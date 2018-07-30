@@ -1,0 +1,334 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\NUnit.3.10.1\build\NUnit.props" Condition="Exists('..\packages\NUnit.3.10.1\build\NUnit.props')" />
+  <Import Project="..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.props" Condition="Exists('..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A29532AB-CFE4-43B2-8C3B-CB39D36E99C0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Tests</RootNamespace>
+    <AssemblyName>Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AngleSharp, Version=0.9.9.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
+      <HintPath>..\packages\AngleSharp.0.9.9.2\lib\net45\AngleSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac, Version=4.8.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.4.8.0\lib\net45\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Bogus, Version=22.1.3.0, Culture=neutral, PublicKeyToken=fa1bb3f3f218129a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Bogus.22.1.3\lib\net40\Bogus.dll</HintPath>
+    </Reference>
+    <Reference Include="GraphQL.Client, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GraphQL.Client.1.0.3\lib\netstandard2.0\GraphQL.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="GraphQL.Common, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GraphQL.Common.1.0.3\lib\netstandard2.0\GraphQL.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSTest.TestFramework.1.2.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSTest.TestFramework.1.2.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.Engine.3.5.0\lib\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql, Version=3.2.7.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Npgsql.3.2.7\lib\net451\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit-agent, Version=3.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.Engine.3.5.0\lib\nunit-agent.exe</HintPath>
+    </Reference>
+    <Reference Include="nunit-agent-x86, Version=3.5.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\NUnit.Engine.3.5.0\lib\nunit-agent-x86.exe</HintPath>
+    </Reference>
+    <Reference Include="nunit.engine, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.Engine.3.5.0\lib\nunit.engine.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.engine.api, Version=3.0.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.Engine.3.5.0\lib\nunit.engine.api.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="ReportPortal.Client, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReportPortal.Client.2.0.0\lib\net45\ReportPortal.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="ReportPortal.Log4Net, Version=1.1.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReportPortal.Log4Net.1.1.5-beta2\lib\net45\ReportPortal.Log4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="ReportPortal.NUnitExtension, Version=3.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReportPortal.NUnit.3.3.0-beta2\lib\net45\ReportPortal.NUnitExtension.dll</HintPath>
+    </Reference>
+    <Reference Include="ReportPortal.Shared, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReportPortal.Shared.2.0.0-beta4\lib\net45\ReportPortal.Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net46\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="SeleniumExtras.WaitHelpers, Version=3.11.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetSeleniumExtras.WaitHelpers.3.11.0\lib\net45\SeleniumExtras.WaitHelpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.1\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.4.0\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="WebDriver, Version=3.12.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Selenium.WebDriver.3.12.0\lib\net45\WebDriver.dll</HintPath>
+    </Reference>
+    <Reference Include="WebDriver.Support, Version=3.12.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Selenium.Support.3.12.0\lib\net45\WebDriver.Support.dll</HintPath>
+    </Reference>
+    <Reference Include="WebDriverManager, Version=2.2.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebDriverManager.2.2.5\lib\net452\WebDriverManager.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiRequests\TempRequests.cs" />
+    <Compile Include="Helpers\Preconditions\PreconditionsHelper.cs" />
+    <Compile Include="Helpers\UI\Link\UiLinkHelper.cs" />
+    <Compile Include="Helpers\UI\Machines\UiMachinesHelper.cs" />
+    <Compile Include="Helpers\UI\Main\UiMainHelper.cs" />
+    <Compile Include="Helpers\UI\Orders\UiOrdersOrderHelper.cs" />
+    <Compile Include="Helpers\UI\Orders\UiOrdersWorkpieceHelper.cs" />
+    <Compile Include="Managers\AuxPageManagers\GeneralPages.cs" />
+    <Compile Include="Managers\AuxPageManagers\MachinesPages.cs" />
+    <Compile Include="Models\Machines\UiModels\TaskAllocationRecord.cs" />
+    <Compile Include="Models\ProjectManager\GraphQlModels\Machine.cs" />
+    <Compile Include="Models\ProjectManager\UiModels\WorkpieceGridRecord.cs" />
+    <Compile Include="Models\ProjectManager\UiModels\TaskGridRecord.cs" />
+    <Compile Include="Models\ToolManager\UiModels\InstanceInStockGridRecord.cs" />
+    <Compile Include="TestsData\Common\Enums\SidePanelData.cs" />
+    <Compile Include="TestsData\Orders\Enums\CreateOrderPopup.cs" />
+    <Compile Include="TestsData\Orders\Enums\GeneralData.cs" />
+    <Compile Include="TestsData\Orders\Enums\WorkpieceDetails.cs" />
+    <Compile Include="TestsData\Inventory\Enums\FilterSearch\FilterSearchData.cs" />
+    <Compile Include="GraphApiRequests\Orders\OrderRequests.cs" />
+    <Compile Include="GraphApiRequests\RequestsManagers\ProjectManagerRequestManager.cs" />
+    <Compile Include="GraphApiRequests\Inventory\DetailsRequests.cs" />
+    <Compile Include="GraphApiRequests\Inventory\ServiceRequests.cs" />
+    <Compile Include="GraphApiRequests\RequestsManagers\ToolManagerRequestsManager.cs" />
+    <Compile Include="GraphApiRequests\Inventory\SearchRequests.cs" />
+    <Compile Include="Helpers\Api\ApiCommonHelper.cs" />
+    <Compile Include="Helpers\Api\ApiHelperTemplate.cs" />
+    <Compile Include="Helpers\Api\ApiSearchHelper.cs" />
+    <Compile Include="Helpers\Db\DbCommonHelper.cs" />
+    <Compile Include="Helpers\Db\DbHelperTemplate.cs" />
+    <Compile Include="Helpers\Db\ProjectManager\ProjectManagerDbHelper.cs" />
+    <Compile Include="Helpers\GraphApi\GraphApiHelperTemplate.cs" />
+    <Compile Include="Helpers\GraphApi\ProjectManager\GraphApiProjectManagerHelper.cs" />
+    <Compile Include="Helpers\GraphApi\ToolManager\GraphApiToolManagerHelper.cs" />
+    <Compile Include="Helpers\HelperTemplate.cs" />
+    <Compile Include="Helpers\UI\Orders\UiOrdersMainHelper.cs" />
+    <Compile Include="Helpers\UI\Inventory\UiInventoryMainHelper.cs" />
+    <Compile Include="Helpers\UI\UiCommonHelper.cs" />
+    <Compile Include="Helpers\UI\Inventory\UiToolInfoHelper.cs" />
+    <Compile Include="Managers\ApplicationManager.cs" />
+    <Compile Include="Managers\AuxManagers\ApiManager.cs" />
+    <Compile Include="Managers\AuxManagers\DbManager.cs" />
+    <Compile Include="Managers\AuxManagers\Templates\AuxManagerTemplate.cs" />
+    <Compile Include="Managers\AuxManagers\GraphApiManager.cs" />
+    <Compile Include="Managers\AuxManagers\UiManager.cs" />
+    <Compile Include="Managers\PageManager.cs" />
+    <Compile Include="Managers\AuxPageManagers\Templates\PagesManagerTemplate.cs" />
+    <Compile Include="Managers\AuxPageManagers\OrdersPages.cs" />
+    <Compile Include="Managers\AuxPageManagers\InventoryPages.cs" />
+    <Compile Include="Models\Generated\Database.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Database.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\PetaPoco.cs" />
+    <Compile Include="Models\ProjectManager\DbModels\Postgres\File.cs" />
+    <Compile Include="Models\ProjectManager\DbModels\Postgres\Interfaces\ICreatable.cs" />
+    <Compile Include="Models\ProjectManager\DbModels\Postgres\Interfaces\IEditable.cs" />
+    <Compile Include="Models\ProjectManager\DbModels\Postgres\Order.cs" />
+    <Compile Include="Models\ProjectManager\DbModels\Postgres\Task.cs" />
+    <Compile Include="Models\ProjectManager\DbModels\Postgres\Workpiece.cs" />
+    <Compile Include="Models\ProjectManager\DbModels\Postgres\Workplan.cs" />
+    <Compile Include="Models\ProjectManager\UiModels\OrderGridRecord.cs" />
+    <Compile Include="Models\Temp\Learn.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\Cutter.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\CutterAssembly.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\CutterGroup.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\CuttingMaterial.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\ExchangablePlate.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\Holder.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\ToolAssembly.cs" />
+    <Compile Include="Models\ToolManager\UiModels\ToolGridRecord.cs" />
+    <Compile Include="Parameters\ParametersFactory.cs" />
+    <Compile Include="Parameters\ParametersSets\Parameters_qa.cs" />
+    <Compile Include="Parameters\ParametersSets\Parameters_Remote.cs" />
+    <Compile Include="Parameters\ParametersSets\Parameters_Local.cs" />
+    <Compile Include="Parameters\ParametersTemplate.cs" />
+    <Compile Include="Parameters\Parameters.cs" />
+    <Compile Include="Service\Starter.cs" />
+    <Compile Include="TestsData\Orders\OrdersData.cs" />
+    <Compile Include="Tests\General\GeneralTests.cs" />
+    <Compile Include="Tests\General\Templates\GeneralTestTemplate.cs" />
+    <Compile Include="Tests\Link\LinkGeneralTests.cs" />
+    <Compile Include="Tests\Link\Templates\LinkTestsTemplate.cs" />
+    <Compile Include="Tests\Machines\MachinesGeneralTests.cs" />
+    <Compile Include="Tests\Machines\Templates\MachinesTestTemplate.cs" />
+    <Compile Include="Tests\Orders\OrdersGeneralTests.cs" />
+    <Compile Include="Tests\Orders\OrderMutationsTests.cs" />
+    <Compile Include="Tests\Orders\OrderTests.cs" />
+    <Compile Include="Tests\Orders\Service\DbService.cs" />
+    <Compile Include="Tests\Orders\Templates\OrdersTestTemplate.cs" />
+    <Compile Include="Tests\TestBase.cs" />
+    <Compile Include="Tests\TestSetup.cs" />
+    <Compile Include="Tests\TestTemplate.cs" />
+    <Compile Include="Tests\Temp\UnitTest2.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\Inventory\AssemblyFilterTests.cs" />
+    <Compile Include="Tests\Inventory\CutterFilterTests.cs" />
+    <Compile Include="Tests\Inventory\CutterSearchTest.cs" />
+    <Compile Include="Tests\Inventory\HolderFilteringTests.cs" />
+    <Compile Include="Tests\Inventory\HolderSearchTest.cs" />
+    <Compile Include="Tests\Inventory\OrderingTests.cs" />
+    <Compile Include="Tests\Inventory\ToolGroupingTests.cs" />
+    <Compile Include="Tests\Inventory\AssemblySearchTests.cs" />
+    <Compile Include="Tests\Inventory\ToolInformationTests.cs" />
+    <Compile Include="Tests\Inventory\Templates\InventoryTestsTemplate.cs" />
+    <Compile Include="UI\Components\ComponentTemplate.cs" />
+    <Compile Include="UI\Components\General\SidePanel.cs" />
+    <Compile Include="UI\Components\GridTemplate.cs" />
+    <Compile Include="UI\Components\Interfaces\IGrid.cs" />
+    <Compile Include="UI\Components\Machines\TasksAllocationGrid.cs" />
+    <Compile Include="UI\Components\Machines\UpcomingTasksGrid.cs" />
+    <Compile Include="UI\Components\Orders\OrdersGrid.cs" />
+    <Compile Include="UI\Components\Orders\WorkpiecesGrid.cs" />
+    <Compile Include="UI\Components\Orders\WorkplanTasksGrid.cs" />
+    <Compile Include="UI\Components\Tools\InstancesInStockGrid.cs" />
+    <Compile Include="UI\Components\Tools\ToolsGrid.cs" />
+    <Compile Include="UI\Pages\General\AnyPage.cs" />
+    <Compile Include="UI\Pages\General\DashboardPage.cs" />
+    <Compile Include="UI\Pages\General\SettingsPage.cs" />
+    <Compile Include="UI\Pages\Link\LinkPage.cs" />
+    <Compile Include="UI\Pages\Machines\MachineDetailsPage.cs" />
+    <Compile Include="UI\Pages\Machines\MachinesTaskAllocationPage.cs" />
+    <Compile Include="UI\Pages\PagesTemplates\PageWithGridTemplate.cs" />
+    <Compile Include="UI\Pages\Orders\OrdersCreateOrderPopup.cs" />
+    <Compile Include="UI\Pages\Orders\OrdersMainPage.cs" />
+    <Compile Include="UI\Pages\PageTemplate.cs" />
+    <Compile Include="UI\Pages\Orders\OrdersOrderDetailsPage.cs" />
+    <Compile Include="UI\Pages\Orders\OrdersWorkpieceDetailsPage.cs" />
+    <Compile Include="UI\Pages\Inventory\InventoryMainPage.cs" />
+    <Compile Include="UI\Pages\Inventory\InventoryToolInformationPopup.cs" />
+    <Compile Include="UI\Pages\Todo\TodoPage.cs" />
+    <Compile Include="UI\UIElementTemplate.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Models\Generated\Database.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Database.cs</LastGenOutput>
+    </Content>
+    <Content Include="TestsData\Orders\Files\InValidCamFile.hh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Length_sorting.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\ValidCamFile.h">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\ValidCamFile2.h" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <Content Include="Data\ReportPortal.addins">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Log4Net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Models\Generated\PetaPoco.Core.ttinclude" />
+    <None Include="Models\Generated\PetaPoco.Generator.ttinclude" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="ReportPortal.conf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestsData\Orders\Files\Test upload file.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core.csproj">
+      <Project>{8764EB90-9D46-41FE-997B-4DE6DC954830}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\TestRail\Gurock.TestRail.csproj">
+      <Project>{2162e7ee-ed4c-4c41-8e21-66976ab11d1a}</Project>
+      <Name>Gurock.TestRail</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.props'))" />
+    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.targets'))" />
+    <Error Condition="!Exists('..\packages\NUnit.3.10.1\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit.3.10.1\build\NUnit.props'))" />
+  </Target>
+  <Import Project="..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.targets" Condition="Exists('..\packages\MSTest.TestAdapter.1.2.0\build\net45\MSTest.TestAdapter.targets')" />
+</Project>

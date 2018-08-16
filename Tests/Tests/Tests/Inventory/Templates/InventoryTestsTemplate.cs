@@ -20,20 +20,20 @@ namespace Tests.Tests.Inventory.Templates
            this.App.BaseUrl = Parameters.Parameters.ToolManagerUrl;
         }
 
+        private Dictionary<FilterSearchData.Filters, string> filtersDropDownsAndTextFields =
+            new Dictionary<FilterSearchData.Filters, string>()
+                {
+                    {FilterSearchData.Filters.UsageMaterial, "Select usage material" },
+                    { FilterSearchData.Filters.ToolMaterial, "Select material" },
+                    { FilterSearchData.Filters.ToolSize, "Tool size" },
+                    { FilterSearchData.Filters.ToolLength, "Tool length" },
+                    { FilterSearchData.Filters.ToolGroup, "Select tool group" },
+                    { FilterSearchData.Filters.Type, "Select type" }
+                };
+
         protected void CheckFiltersInitialState(Dictionary<FilterSearchData.Filters, object> filtersToCheck)
         {
-            List<FilterSearchData.Filters> filtersDropDownsAndTextFields =
-                new List<FilterSearchData.Filters>()
-                    {
-                        FilterSearchData.Filters.UsageMaterial,
-                        FilterSearchData.Filters.ToolMaterial,
-                        FilterSearchData.Filters.ToolSize,
-                        FilterSearchData.Filters.ToolLength,
-                        FilterSearchData.Filters.ToolGroup,
-                        FilterSearchData.Filters.ToolSubGroup
-                    };
-
-            List<FilterSearchData.Filters> filtersCheckBoxes =
+           List<FilterSearchData.Filters> filtersCheckBoxes =
                 new List<FilterSearchData.Filters>()
                     {
                         FilterSearchData.Filters.Cooling,
@@ -42,14 +42,15 @@ namespace Tests.Tests.Inventory.Templates
 
             var filtersToCheckList = filtersToCheck.Keys.ToList();
 
-            filtersDropDownsAndTextFields = filtersToCheckList.Intersect(filtersDropDownsAndTextFields).ToList();
+            var filtersDropDownsAndTextFieldsFilters = filtersToCheckList.Intersect(filtersDropDownsAndTextFields.Keys).ToList();
             filtersCheckBoxes = filtersToCheckList.Intersect(filtersCheckBoxes).ToList();
 
-            var filtersStates = this.App.Ui.ToolsMain.GetFiltersStates(filtersDropDownsAndTextFields);
+            App.Ui.ToolsMain.ClickFiltersButton();
+            var filtersStates = this.App.Ui.ToolsMain.GetFiltersStates(filtersDropDownsAndTextFieldsFilters);
 
             foreach (var key in filtersStates.Keys)
             {
-                Assert.That(filtersStates[key].Equals(String.Empty), "Wrong initial state for " + key);
+                Assert.That(filtersStates[key].Equals(filtersDropDownsAndTextFields[key]), "Wrong initial state for " + key);
             }
 
             filtersStates = this.App.Ui.ToolsMain.GetFiltersStates(filtersCheckBoxes);
@@ -59,13 +60,13 @@ namespace Tests.Tests.Inventory.Templates
                 Assert.That(filtersStates[key].Equals("False"), "Wrong initial state for " + key);
             }
 
-            var filters = new List<FilterSearchData.Filters>(filtersDropDownsAndTextFields);
+            var filters = new List<FilterSearchData.Filters>(filtersDropDownsAndTextFieldsFilters);               
             filters.AddRange(filtersCheckBoxes);
 
             var enabledDisabledStates = this.App.Ui.ToolsMain.AreFiltersEnabled(filters);
             foreach (var key in enabledDisabledStates.Keys)
             {
-                if (key != FilterSearchData.Filters.ToolSubGroup)
+                if (key != FilterSearchData.Filters.Type)
                 {
                     Assert.True(enabledDisabledStates[key], "Wrong availability state for " + key + ". Should be enabled");
                 }
@@ -86,7 +87,7 @@ namespace Tests.Tests.Inventory.Templates
                         FilterSearchData.Filters.ToolSize,
                         FilterSearchData.Filters.ToolLength,
                         FilterSearchData.Filters.ToolGroup,
-                        FilterSearchData.Filters.ToolSubGroup,
+                        FilterSearchData.Filters.Type,
                         FilterSearchData.Filters.Cooling,
                         FilterSearchData.Filters.AvaliabilityInStock,
                     };
@@ -112,7 +113,7 @@ namespace Tests.Tests.Inventory.Templates
             {
                 var itemApi = itemsApi.First(i => i.Name == item.Name);
 
-                if (itemApi.CutterAssembly.Cutter[0].Diameter != item.CutterAssembly.Cutter[0].Diameter
+                if (itemApi.CutterAssembly.Cutter.Diameter != item.CutterAssembly.Cutter.Diameter
                     || itemApi.Length != item.Length || itemApi.Quantity != item.Quantity)
                 {
                     itemsAreEqual = false;
@@ -129,10 +130,11 @@ namespace Tests.Tests.Inventory.Templates
             bool itemsAreEqual = true;
             foreach (var item in itemsUi)
             {
-                var itemApi = itemsApi.First(i => i.Name == item.Name);
+                var itemApi = itemsApi.FirstOrDefault(i => i.Name == item.Name 
+                                                           && i.Cutter.Diameter == item.Cutter.Diameter 
+                                                           && i.Length == item.Length);
 
-                if (itemApi.Cutter[0].Diameter != item.Cutter[0].Diameter
-                    || itemApi.Length != item.Length || itemApi.Quantity != item.Quantity)
+                if (itemApi == null || itemApi.Quantity != item.Quantity)
                 {
                     itemsAreEqual = false;
                 }
@@ -188,7 +190,7 @@ namespace Tests.Tests.Inventory.Templates
                     {
                         var materialId = this.App.GraphApi.ToolManager.GetCuttingMaterials().First(e => e.Name.Equals((string)filterValue)).Id;
                         apiItemsAreCorrect =
-                            items.All(i => i.CutterAssembly.CuttingMaterial.Id.Equals(materialId));
+                            items.All(i => i.CutterAssembly.Material.Id.Equals(materialId));
                         break;
                     }
 
@@ -215,10 +217,10 @@ namespace Tests.Tests.Inventory.Templates
                         }
                         else
                         {
-                            apiItemsAreCorrect = items.All(e => e.CutterAssembly.Cutter.First().Cooling);
+                            apiItemsAreCorrect = items.All(e => e.CutterAssembly.Cutter.Cooling);
                             if (!apiItemsAreCorrect)
                             {
-                                wrongItemsNames = items.Where(i => !i.CutterAssembly.Cutter.First().Cooling)
+                                wrongItemsNames = items.Where(i => !i.CutterAssembly.Cutter.Cooling)
                                     .Select(i => i.Name).ToList();
                             }
                         }
@@ -232,18 +234,18 @@ namespace Tests.Tests.Inventory.Templates
 
                         // Check that subgroup of ToolAssembly is child to defined group.
                         apiItemsAreCorrect = items.All(
-                            i => groups.First(g => g.Id.Equals(i.CutterAssembly.Cutter.First().GeometryStr)).ParentId
+                            i => groups.First(g => g.Id.Equals(i.CutterAssembly.Cutter.GeometryStr)).ParentId
                                 .Equals(currentGroup));
                         break;
                     }
 
-                case FilterSearchData.Filters.ToolSubGroup:
+                case FilterSearchData.Filters.Type:
                     {
                         var groups = this.App.GraphApi.ToolManager.GetCutterGroups();
                         var currentGroup = groups.First(g => g.Name.Equals(filterValue)).Id;
 
                         apiItemsAreCorrect = items.All(
-                            i => i.CutterAssembly.Cutter[0].GeometryStr.Equals(currentGroup));
+                            i => i.CutterAssembly.Cutter.GeometryStr.Equals(currentGroup));
                         break;
                     }
 
@@ -255,7 +257,7 @@ namespace Tests.Tests.Inventory.Templates
 
                 case FilterSearchData.Filters.ToolSize:
                     {
-                        apiItemsAreCorrect = items.All(i => i.CutterAssembly.Cutter.First().Diameter == (int)filterValue);
+                        apiItemsAreCorrect = items.All(i => i.CutterAssembly.Cutter.Diameter == (int)filterValue);
                         break;
                     }
 
@@ -299,7 +301,7 @@ namespace Tests.Tests.Inventory.Templates
 
                         var materialId = this.App.GraphApi.ToolManager.GetCuttingMaterials().First(e => e.Name.Equals((string)filterValue)).Id;
                         apiItemsAreCorrect =
-                            items.All(i => i.CuttingMaterial.Id.Equals(materialId));
+                            items.All(i => i.Material.Id.Equals(materialId));
                         break;
                     }
 
@@ -327,10 +329,10 @@ namespace Tests.Tests.Inventory.Templates
                         }
                         else
                         {
-                            apiItemsAreCorrect = items.All(e => e.Cutter.First().Cooling);
+                            apiItemsAreCorrect = items.All(e => e.Cutter.Cooling);
                             if (!apiItemsAreCorrect)
                             {
-                                wrongItemsNames = items.Where(i => !i.Cutter.First().Cooling)
+                                wrongItemsNames = items.Where(i => !i.Cutter.Cooling)
                                     .Select(i => i.Name).ToList();
                             }
                         }
@@ -345,18 +347,18 @@ namespace Tests.Tests.Inventory.Templates
 
                         // Check that subgroup of ToolAssembly is child to defined group.
                         apiItemsAreCorrect = items.All(
-                            i => groups.First(g => g.Id.Equals(i.Cutter.First().GeometryStr)).ParentId
+                            i => groups.First(g => g.Id.Equals(i.Cutter.GeometryStr)).ParentId
                                 .Equals(currentGroup));
                         break;
                     }
 
-                case FilterSearchData.Filters.ToolSubGroup:
+                case FilterSearchData.Filters.Type:
                     {
                         var groups = this.App.GraphApi.ToolManager.GetCutterGroups();
                         var currentGroup = groups.First(g => g.Name.Equals(filterValue)).Id;
 
                         apiItemsAreCorrect = items.All(
-                            i => i.Cutter[0].GeometryStr.Equals(currentGroup));
+                            i => i.Cutter.GeometryStr.Equals(currentGroup));
                         break;
                     }
 
@@ -368,7 +370,7 @@ namespace Tests.Tests.Inventory.Templates
 
                 case FilterSearchData.Filters.ToolSize:
                     {
-                        apiItemsAreCorrect = items.All(i => i.Cutter.First().Diameter == (int)filterValue);
+                        apiItemsAreCorrect = items.All(i => i.Cutter.Diameter == (int)filterValue);
                         break;
                     }
 
@@ -416,7 +418,7 @@ namespace Tests.Tests.Inventory.Templates
                         }
                         else
                         {
-                            //Due to current API logic
+                            // Due to current API logic - if filterVlaue is false it returns both true and false entities
                             apiItemsAreCorrect = items.All(i => i.Quantity >= 0);
                         }
 
@@ -427,7 +429,7 @@ namespace Tests.Tests.Inventory.Templates
                     {
                         if (!(bool)filterValue)
                         {
-                            //Due to current Graph API logic
+                            // Due to current API logic - if filterVlaue is false it returns both true and false entities
                             apiItemsAreCorrect = true;
                         }
                         else
@@ -574,30 +576,30 @@ namespace Tests.Tests.Inventory.Templates
             foreach (var filter in filters.Keys)
             {
                 Assert.AreEqual(
-                    filters[filter] == null ? string.Empty : filters[filter].ToString(),
+                    filters[filter] == null ? filtersDropDownsAndTextFields[filter] : filters[filter].ToString(),
                     states[filter],
                     $"Filter {filter} in a wrong state. Actual is {states[filter]} but should be {filters[filter]}");
             }
-
+            
             resetMethod.Invoke();
-
+            
             var resultsUiAfterUpdate = this.App.Ui.ToolsMain.GetGridRecords();
 
             Assert.That(
                 resultsUi.Count != resultsUiAfterUpdate.Count &&
                 !resultsUiAfterUpdate.Contains(resultsUi.First()),
-                "InventoryMain wasn't reset");
+                "Tools Main page wasn't reset");
 
             if (!resetToolType)
             {
                 Assert.That(
                     resultsUiAfterUpdate.Select(e => e.Name).ToList()
                         .SequenceEqual(resultsBuforeFilteringUi.Select(e => e.Name).ToList()),
-                    "InventoryMain wasn't reset");
+                    "Tools Main page wasn't reset");
             }
             else
             {
-                Assert.That(this.App.Ui.ToolsMain.GetActiveToolType().Equals(FilterSearchData.ToolsTypes.Assemblies));
+                Assert.That(this.App.Ui.ToolsMain.GetActiveToolType().Equals(FilterSearchData.ToolsTypes.Tools));
             }
 
             this.CheckFiltersInitialState(filters);

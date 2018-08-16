@@ -63,7 +63,7 @@ namespace Tests.Helpers.Api
 
         protected IRestClient CreateClient(string baseUrl = null, int timeoutMsec = 120000)
         {
-            baseUrl = string.IsNullOrEmpty(baseUrl) ? Parameters.Parameters.ToolManagerUrl : baseUrl;
+            baseUrl = string.IsNullOrEmpty(baseUrl) ? Parameters.Parameters.ApplicationUrl : baseUrl;
             RestClient restClient = new RestClient(baseUrl);
             restClient.CookieContainer = new CookieContainer();
             restClient.AddHandler("application/json", NewtonsoftCustom.Default);
@@ -140,6 +140,12 @@ namespace Tests.Helpers.Api
         {
             IRestClient restClient;
             this.clients.TryGetValue(clientName, out restClient);
+            if (restClient == null)
+            {
+                restClient = this.CreateClient();
+                SetClient(clientName, restClient);
+            }
+
             return restClient;
         }
 

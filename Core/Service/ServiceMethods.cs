@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
 
     /// <summary>
     /// The service methods.
@@ -31,6 +32,31 @@
         {
             Random random = new Random();
             return Enumerable.Range(from, toCount).OrderBy(n => random.Next()).Take(numberOfElements).ToList();
+        }
+
+
+        public static T GetRandom<T>(List<T> list)
+        {
+            return GetRandom(list, 1)[0];
+        }
+            
+        public static List<T> GetRandom<T>(List<T> list, int numberOfElements)
+        {
+            List<T> resultsList = new List<T>();
+            Random random = new Random();
+
+            numberOfElements = numberOfElements <= list.Count ? numberOfElements : list.Count;
+            
+                var elementsNumbers = Enumerable.Range(0, list.Count).OrderBy(n => random.Next()).Take(numberOfElements)
+                    .ToList();
+
+            foreach (var e in elementsNumbers)
+            {
+                resultsList.Add(list[e]);
+            }
+
+            return resultsList;
+
         }
 
         /// <summary>
@@ -185,9 +211,37 @@
             int timeMinutes = 0;
             timeMinutes += int.Parse(durationData[0]) * 3600; //seconds in a hour
             timeMinutes += int.Parse(durationData[1]) * 60; //seconds in a minute
-            timeMinutes += int.Parse(durationData[2]); //seconds themselves
+            timeMinutes += int.Parse(durationData[2].Replace("h", string.Empty)); //seconds themselves
 
             return timeMinutes;
+        }
+
+        public static void WaitForOperationPositive(Func<bool> operation, int timeoutSec = 10)
+        {
+            int counter = 0;
+            while (!operation.Invoke() && counter++ < timeoutSec)
+            {
+                Thread.Sleep(1000);
+            }
+
+            if (counter >= timeoutSec)
+            {
+                throw new Exception($"Timeout error. Was being waiting for {timeoutSec} sec");
+            }
+        }
+
+        public static void WaitForOperationNegative(Func<bool> operation, int timeoutSec = 10)
+        {
+            int counter = 0;
+            while (operation.Invoke() && counter++ < timeoutSec)
+            {
+                Thread.Sleep(1000);
+            }
+
+            if (counter >= timeoutSec)
+            {
+                throw new Exception($"Timeout error. Was being waiting for {timeoutSec} sec");
+            }
         }
     }
 }

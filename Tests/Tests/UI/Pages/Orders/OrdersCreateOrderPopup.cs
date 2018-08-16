@@ -11,10 +11,7 @@ namespace Tests.UI.Pages.Orders
     using Core.WeDriverService.Extensions;
 
     using global::Tests.TestsData.Orders.Enums;
-
-    using Microsoft.SqlServer.Server;
-
-    using NUnit.Framework.Constraints;
+    using global::Tests.UI.Components.General;
 
     using OpenQA.Selenium;
     using OpenQA.Selenium.Support.UI;
@@ -28,65 +25,55 @@ namespace Tests.UI.Pages.Orders
 
         #region locators
 
-        private readonly By customerSelectLocator = By.Name("customerId");
+        private readonly By customerSelectLocator = By.CssSelector("button[class*='DropDownField']");
 
-        private readonly By orderIdSelectorLocator = By.Name("externalOrderId");
+        private readonly By orderIdInputLocator = By.Name("externalOrderId");
 
-        private readonly By orderDeliveryDateInputLocator = By.CssSelector("input[name='deliveryDate'][class*='order-info']");
+        private readonly By orderDeliveryDateInputLocator =
+            By.CssSelector("div[class*='datepicker'] input");
 
         private readonly By commentsInputLocator = By.Name("comments");
-
-        private readonly By workpieceIdInputLocator = By.Name("externalWorkpieceId");
-
-        private readonly By workpieceNameInputLocator = By.Name("name");
-
-        private readonly By quantityInputLocator = By.Name("quantity");
-
-        private readonly By workpieceDeliveryDateInputLocator = By.CssSelector("input[name='deliveryDate'][class*='new-workpiece']");
 
         private readonly By titleLocator = By.CssSelector("div[class$='modal-header_title']");
 
         private readonly By closeButtonLocator = By.CssSelector("button[class$='close']");
 
         private readonly By saveButtonLocator = By.XPath("//button[./span[.='Save']]");
-
-        private readonly By addWorkpieceButtonLocator = By.CssSelector("button[class*='new-workpiece']");
-
-        private readonly string addFilesButtonMask =
-            "//table[contains(@class, 'workpiece-list_root')]/tbody/tr[./td[.='{0}']]//input[contains(@class, 'file')]";
-
-        private readonly string workpieceFilesMask =
-            "//table[contains(@class, 'workpiece-list_root')]/tbody/tr[./td[.='{0}']]/following-sibling::tr[contains(@class,'row_files')]//p";
-
+       
         #endregion
 
         private Dictionary<CreateOrderPopup.OrderFields, By> FieldsLocators =>
             new Dictionary<CreateOrderPopup.OrderFields, By>
                 {
                     {
-                        CreateOrderPopup.OrderFields
-                            .Customer,
+                        CreateOrderPopup.OrderFields.Customer,
                         this.customerSelectLocator
                     },
-                    { CreateOrderPopup.OrderFields.OrderId, this.orderIdSelectorLocator },
-                    { CreateOrderPopup.OrderFields.OrderDeliveryDate, this.orderDeliveryDateInputLocator},
-                    { CreateOrderPopup.OrderFields.Comments, this.commentsInputLocator },
-                    { CreateOrderPopup.OrderFields.WorkpieceId, this.workpieceIdInputLocator },
-                    { CreateOrderPopup.OrderFields.WorkpieceName, this.workpieceNameInputLocator },
-                    { CreateOrderPopup.OrderFields.WorkpieceQuantity, this.quantityInputLocator},
-                    { CreateOrderPopup.OrderFields.WorkpieceDeliveryDate, this.workpieceDeliveryDateInputLocator }
+                    {
+                        CreateOrderPopup.OrderFields.OrderId,
+                        this.orderIdInputLocator
+                    },
+                    {
+                        CreateOrderPopup.OrderFields.OrderDeliveryDate,
+                        this.orderDeliveryDateInputLocator
+                    },
+                    {
+                        CreateOrderPopup.OrderFields.Comments,
+                        this.commentsInputLocator
+                    },
                 };
 
 
         #region selects
 
-        private SelectElement CustomerSelector => new SelectElement(this.Driver.Find(this.customerSelectLocator));
+        private CustomSelector CustomerSelector => new CustomSelector(Driver, customerSelectLocator);
 
         #endregion
-        
+
         public List<string> GetSectionFieldsTitles(string sectionName)
         {
-            var sectionLocator = By.XPath($"//p[contains(@class, 'sectionTitle') and .='{sectionName}']/following-sibling::form");
+            var sectionLocator = By.XPath(
+                $"//p[contains(@class, 'sectionTitle') and .='{sectionName}']/following-sibling::form");
 
             var section = this.Driver.Find(sectionLocator);
             return section.FindElements(By.CssSelector("label")).Select(t => t.Text).ToList();
@@ -94,11 +81,11 @@ namespace Tests.UI.Pages.Orders
 
         public string GetFieldState(CreateOrderPopup.OrderFields field)
         {
-           
+
             if (field.Equals(CreateOrderPopup.OrderFields.Customer))
-           {
-               return this.CustomerSelector.SelectedOption.Text;
-           }
+            {
+                return this.CustomerSelector.SelectedOption();
+            }
 
             return this.Driver.Find(this.FieldsLocators[field]).GetAttribute("value");
         }
@@ -114,6 +101,7 @@ namespace Tests.UI.Pages.Orders
         }
 
         #region waits
+
         public void WaitForPageLoad(int timeout = 30)
         {
             this.Driver.WaitForElement(this.titleLocator, timeout);
@@ -128,6 +116,7 @@ namespace Tests.UI.Pages.Orders
                 throw new Exception("Can't close Create order popup");
             }
         }
+
         #endregion
 
         public void Close()
@@ -139,76 +128,60 @@ namespace Tests.UI.Pages.Orders
 
         public void PopulateField(CreateOrderPopup.OrderFields field, string value)
         {
-           
-                if (field.Equals(CreateOrderPopup.OrderFields.Customer))
+
+            if (field.Equals(CreateOrderPopup.OrderFields.Customer))
+            {
+                if (value != null)
                 {
-                    if (value != null)
-                    {
-                        this.CustomerSelector.SelectByText(value);
-                    }
-                    else
-                    {
-                        this.CustomerSelector.SelectByText("");
-                    }
+                    this.CustomerSelector.SelectOption(value);
                 }
                 else
                 {
-                    var el = this.Driver.Find(this.FieldsLocators[field]);
-
-                    // el.Clear is not used since validation doesn't work with this method
-                    el.SendKeys(Keys.Control + "a");
-                    el.SendKeys(Keys.Delete);
-                if (value != null)
-                    {
-                        el.SendKeys(value);
-                    }
+                    this.CustomerSelector.SelectOption("");
                 }
             }
-        
-        public void ClickSaveButton()
-        {
-           this.Driver.Find(this.saveButtonLocator).Click();
+            else
+            {
+                var el = this.Driver.Find(this.FieldsLocators[field]);
+
+                // el.Clear is not used since validation doesn't work with this method
+                el.SendKeys(Keys.Control + "a");
+                el.SendKeys(Keys.Delete);
+                if (value != null)
+                {
+                    el.SendKeys(value);
+                }
+            }
         }
 
-        public void ClickAddWorkpieceButton()
+        public void ClickSaveButton()
         {
-            this.Driver.Find(this.addWorkpieceButtonLocator).Click();
+            this.Driver.Find(this.saveButtonLocator).Click();
         }
+
+
 
         public bool IsSaveButtonEnabled()
         {
             return this.Driver.Find(this.saveButtonLocator).Enabled;
         }
 
-        public bool IsAddWorkpieceButtonEnabled()
-        {
-            return this.Driver.Find(this.addWorkpieceButtonLocator).Enabled;
-        }
+
 
         public List<string> GetOrderFieldsTitles()
         {
-            var orderFieldLabelLocator = By.CssSelector("form[class*='order-info'] label");
+            var orderFieldLabelLocator = By.CssSelector("form[class*='order-form'] label");
 
             return Driver.Finds(orderFieldLabelLocator).Select(e => e.Text).ToList();
         }
+        
+       
 
-        public void AddFileForWorkpice(string workPieceId, string filePath)
+       
+
+        public void WaitForpageLoad()
         {
-           Driver.FindElement(By.XPath(string.Format(this.addFilesButtonMask, workPieceId))).SendKeys(filePath);
-        }
-
-        public List<string> GetFilesForWorkpiece(string externalWorkpieceId)
-        {
-            var files = Driver.Finds(By.XPath(string.Format(this.workpieceFilesMask, externalWorkpieceId)))
-                .Select(e => e.Text).ToList();
-            List<string> results = new List<string>();
-            foreach (var file in files)
-            {
-                var texts = file.Split(new[] { "\r\n" }, StringSplitOptions.None);
-                results.Add(texts[0]);
-            }
-
-            return results;
+            Driver.WaitForElementToBeClickable(this.saveButtonLocator);
         }
     }
 }

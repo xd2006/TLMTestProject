@@ -1,6 +1,9 @@
 ﻿
 namespace Tests.Helpers.UI
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     using global::Tests.Managers;
 
     using OpenQA.Selenium;
@@ -40,6 +43,11 @@ namespace Tests.Helpers.UI
         public void PressBrowserBackButton()
         {
           App.Pages.Driver.Navigate().Back();
+        }
+
+        public List<LogEntry> GetBrowserLogs()
+        {
+            return App.Pages.Driver.Manage().Logs.GetLog(LogType.Browser).ToList();           
         }
     }
 }

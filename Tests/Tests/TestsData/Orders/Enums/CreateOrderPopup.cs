@@ -9,10 +9,6 @@ namespace Tests.TestsData.Orders.Enums
             OrderId,
             OrderDeliveryDate,
             Comments,
-            WorkpieceId,
-            WorkpieceName,
-            WorkpieceQuantity,
-            WorkpieceDeliveryDate
         }
     }
 }

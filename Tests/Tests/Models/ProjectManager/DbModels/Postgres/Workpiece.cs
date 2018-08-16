@@ -28,5 +28,7 @@ namespace Tests.Models.ProjectManager.DbModels.Postgres
         public DateTime CreatedDate { get; set; }
 
         public DateTime EditedDate { get; set; }
+
+        public int RawMaterialId { get; set; }
     }
 }

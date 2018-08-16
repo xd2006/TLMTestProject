@@ -1,4 +1,6 @@
-﻿namespace Tests.Managers
+﻿using Tests.UI.Pages.ToolScout;
+
+namespace Tests.Managers
 {
     using System;
     using System.Threading;
@@ -26,6 +28,7 @@
 
         private MachinesPages machinesPages;
 
+        private ToolScoutPage _toolScoutPage;
         /// <summary>
         /// Initializes a new instance of the <see cref="PageManager"/> class.
         /// </summary>
@@ -108,6 +111,8 @@
         public GeneralPages GeneralPages => this.generalPages ?? (this.generalPages = new GeneralPages(this.Driver));
 
         public MachinesPages MachinesPages => this.machinesPages ?? (this.machinesPages = new MachinesPages(this.Driver));
+
+        public ToolScoutPage ToolScoutPage => _toolScoutPage ?? (this._toolScoutPage = new ToolScoutPage(this.Driver));
 
         #endregion
     }

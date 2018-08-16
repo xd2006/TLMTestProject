@@ -36,7 +36,7 @@ namespace Tests.UI.Pages.Machines
             var cells = Driver.Finds(this.currentTaskInfoCellLocator).Select(c => c.Text).ToList();
 
             currentTask.CurrentTask = cells[0];
-            currentTask.Workpiece = cells[1];
+            currentTask.WorkpieceName = cells[1];
             currentTask.ActualStart = cells[2];
             currentTask.EstimatedDuration = cells[3];
             currentTask.EstimatedEnd = cells[4];
@@ -45,9 +45,9 @@ namespace Tests.UI.Pages.Machines
             return currentTask;
         }
 
-        public List<TaskAllocationRecord> GetUpcomingTasks()
+        public List<TaskAllocationRecord> GetUpcomingTasks(bool shouldFind, int timeoutSec)
         {
-            return UpcomingTasksGrid.GetRecords();
+            return UpcomingTasksGrid.GetRecords(shouldFind, timeoutSec);
         }
 
         public void ClickBackLink()

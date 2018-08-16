@@ -15,11 +15,12 @@ namespace Tests.UI.Pages.Machines
     public class MachinesTaskAllocationPage : PageWithGridTemplate
     {
 
-        private By headerLocator = By.XPath("//h1[contains(@class, 'PageTitle')][.='Machine and Task Allocation']");
+        private By headerLocator = By.XPath("//h1[contains(@class, 'PageTitle')][.='Machines']");
 
         public MachinesTaskAllocationPage(IWebDriver driver)
             : base(driver)
         {
+            this.WaitForPageLoad();
         }
 
         private TasksAllocationGrid TasksAllocationGrid => new TasksAllocationGrid(Driver);

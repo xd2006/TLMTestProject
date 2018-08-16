@@ -21,7 +21,7 @@ namespace Tests.GraphApiRequests.Inventory
                     FilterSearchData.Filters.ToolLength,
                     FilterSearchData.Filters.ToolMaterial,
                     FilterSearchData.Filters.ToolSize,
-                    FilterSearchData.Filters.ToolSubGroup,
+                    FilterSearchData.Filters.Type,
                     FilterSearchData.Filters.UsageMaterial,
                     FilterSearchData.Filters.ToolGroup
                 };
@@ -34,7 +34,7 @@ namespace Tests.GraphApiRequests.Inventory
                     FilterSearchData.Filters.ToolLength,
                     FilterSearchData.Filters.ToolMaterial,
                     FilterSearchData.Filters.ToolSize,
-                    FilterSearchData.Filters.ToolSubGroup,
+                    FilterSearchData.Filters.Type,
                     FilterSearchData.Filters.UsageMaterial,
                     FilterSearchData.Filters.ToolGroup
                 };
@@ -292,7 +292,7 @@ namespace Tests.GraphApiRequests.Inventory
                             "group"
                         },
                         {
-                            FilterSearchData.Filters.ToolSubGroup,
+                            FilterSearchData.Filters.Type,
                             "subGroup"
                         }
                     };

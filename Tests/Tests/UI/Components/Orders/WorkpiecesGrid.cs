@@ -27,6 +27,12 @@ namespace Tests.UI.Components.Orders
 
         public List<WorkpieceGridRecord> GetRecords()
         {
+            return this.GetRecords(20);
+        }
+
+
+        public List<WorkpieceGridRecord> GetRecords(int timeoutSec)
+        {
            
             List<WorkpieceGridRecord> entities = new List<WorkpieceGridRecord>();
             
@@ -68,20 +74,19 @@ namespace Tests.UI.Components.Orders
                 catch (Exception e)
                 {
                     error = e.Message;
-                    Thread.Sleep(500);
+                    Thread.Sleep(1000);
                     entities.Clear();
                 }
             }
-            while (error != string.Empty && i++ < 10);
+            while (error != string.Empty && i++ < timeoutSec);
 
-            if (i >= 10)
+            if (i >= timeoutSec)
             {
                 throw new Exception(error);
             }
 
             return entities;
-        }
-        
+        }      
 
         public new void ClickRecord(string workpieceId)
         {
@@ -93,6 +98,12 @@ namespace Tests.UI.Components.Orders
             var element = this.Driver.WaitForSpecificElement(method);
             element.Click();
         }
-        
+
+        public void ClickRecord(int index)
+        {
+            IWebElement Method(IWebDriver webDriver) => webDriver.Finds(RecordNameLocator).ElementAt(index);
+            var element = this.Driver.WaitForSpecificElement(Method);
+            element.Click();
+        }
     }
 }

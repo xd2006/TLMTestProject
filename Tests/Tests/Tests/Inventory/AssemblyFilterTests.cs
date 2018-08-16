@@ -28,16 +28,19 @@ namespace Tests.Tests.Inventory
         {
             List<string> filters = new List<string>
                                        {
-                                           "Usage material:",
-                                           "Tool material:",
-                                           "Tool size:",
-                                           "Tool length:",
-                                           "Tool group:",
-                                           "Cooling functionality:",
-                                           "Availability in stock:"
+                                           "Usage material",
+                                           "Tool material",
+                                           "Tool size",
+                                           "Tool length",
+                                           "Tool group",
+                                           "Type",
+                                           "Cooling functionality",
+                                           "Availability in stock"
                                        };
 
             var filtersLabels = this.App.Ui.ToolsMain.GetFilterLabels();
+            filtersLabels = ServiceMethods.StringListToUpper(filtersLabels);
+            filters = ServiceMethods.StringListToUpper(filters);
 
             Assert.That(filters.SequenceEqual(filtersLabels), "Wrong labels are displayed");
         }
@@ -48,6 +51,7 @@ namespace Tests.Tests.Inventory
         [Property("Reference", "TLM-64")]
         public void FiltersInitialState()
         {
+            App.Ui.ToolsMain.ClickFiltersButton();
             this.CheckFiltersInitialState();
         }
 
@@ -136,7 +140,7 @@ namespace Tests.Tests.Inventory
                 new Dictionary<FilterSearchData.Filters, object>
                     {
                         { FilterSearchData.Filters.ToolGroup, toolGroup },
-                        { FilterSearchData.Filters.ToolSubGroup, subGroup }
+                        { FilterSearchData.Filters.Type, subGroup }
                     };
 
 
@@ -177,7 +181,7 @@ namespace Tests.Tests.Inventory
                         },
                         { FilterSearchData.Filters.Cooling, cooling },
                         { FilterSearchData.Filters.ToolGroup, toolGroup },
-                        { FilterSearchData.Filters.ToolSubGroup, toolSubGroup},
+                        { FilterSearchData.Filters.Type, toolSubGroup},
                         {
                             FilterSearchData.Filters.AvaliabilityInStock,
                             availableInStock
@@ -251,7 +255,7 @@ namespace Tests.Tests.Inventory
                 new List<FilterSearchData.Filters>()
                     {
                         FilterSearchData.Filters.ToolGroup,
-                        FilterSearchData.Filters.ToolSubGroup
+                        FilterSearchData.Filters.Type
                     };
 
 
@@ -278,7 +282,7 @@ namespace Tests.Tests.Inventory
                             FilterSearchData.Filters.ToolGroup, "Mill"
                         },
                         {
-                            FilterSearchData.Filters.ToolSubGroup, "Cone"
+                            FilterSearchData.Filters.Type, "Cone"
                         }
                     };
 
@@ -309,7 +313,7 @@ namespace Tests.Tests.Inventory
                         { FilterSearchData.Filters.ToolGroup, null },
                         { FilterSearchData.Filters.AvaliabilityInStock, false }
                     };
-            this.ResetFiltersTest(this.App.Ui.ToolsMain.ResetSearchAndFilters, filters, FilterSearchData.ToolsTypes.Assemblies);        
+            this.ResetFiltersTest(this.App.Ui.ToolsMain.ResetFiltersAndSearch, filters, FilterSearchData.ToolsTypes.Tools);        
         }
 
         [Test]
@@ -330,7 +334,7 @@ namespace Tests.Tests.Inventory
                                         { FilterSearchData.Filters.ToolGroup, null },
                                         { FilterSearchData.Filters.AvaliabilityInStock, false }
                                     };
-            this.ResetFiltersTest(this.App.Ui.ToolsMain.RefreshPage, filters, FilterSearchData.ToolsTypes.Assemblies, true);
+            this.ResetFiltersTest(this.App.Ui.ToolsMain.RefreshPage, filters, FilterSearchData.ToolsTypes.Tools, true);
         }
     }
 
@@ -343,7 +347,7 @@ namespace Tests.Tests.Inventory
             get
             {
                 yield return new TestCaseData(FilterSearchData.Filters.UsageMaterial, "STAHL")
-                    .SetProperty("TestCase", "131").SetProperty("Bug", "TLM-174");
+                    .SetProperty("TestCase", "131");
                 yield return new TestCaseData(FilterSearchData.Filters.ToolMaterial, "HSS").SetProperty("TestCase", "132");
                 yield return new TestCaseData(FilterSearchData.Filters.ToolSize, 12000000).SetProperty("TestCase", "133");
                 yield return new TestCaseData(FilterSearchData.Filters.ToolLength, 131000000).SetProperty("TestCase", "134");

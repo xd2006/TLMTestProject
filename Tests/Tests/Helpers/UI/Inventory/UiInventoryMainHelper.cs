@@ -6,6 +6,8 @@ namespace Tests.Helpers.UI.Inventory
     using System.Linq;
     using System.Threading;
 
+    using AngleSharp.Css.Values;
+
     using Core.Service;
     using Core.WeDriverService.Extensions;
 
@@ -31,32 +33,54 @@ namespace Tests.Helpers.UI.Inventory
         public Dictionary<FilterSearchData.Filters, bool> AreFiltersEnabled(List<FilterSearchData.Filters> filters)
         {
             Dictionary<FilterSearchData.Filters, bool> filtersStates = new Dictionary<FilterSearchData.Filters, bool>();
-
             foreach (var filter in filters)
             {
-                var filterState = this.App.Pages.ToolsPages.ToolsMainPage.IsFilterEnabled(filter);
+                var filterState = this.App.Pages.ToolsPages.FiltersPopup.IsFilterEnabled(filter);
                 filtersStates.Add(filter, filterState);
             }
-
             return filtersStates; 
         }
         
         public void PerformSearch(string searchTerm)
         {
-            this.UpdateGrid(
+            this.UpdateGridSlow(
                 () =>
                     {
-                    this.App.Pages.ToolsPages.ToolsMainPage.PopulateSearchField(searchTerm);
-                        this.App.Pages.ToolsPages.ToolsMainPage.ClickSearchButton();
+                    this.App.Pages.ToolsPages.ToolsMainPage.PopulateSearchField(searchTerm); 
+                         App.Pages.ToolsPages.ToolsMainPage.ClickEnterInSearchInput();
                     },
-                5);
+                10);
         }
-
         public void PerformFiltering(Dictionary<FilterSearchData.Filters, object> filters, bool populateOnly = false)
         {
-            var elements = this.App.Pages.ToolsPages.ToolsMainPage.GetRawGridLineElements();
+           
+            if (filters != null && filters.ContainsKey(FilterSearchData.Filters.Search))
+            {
+                {
+                    if (!populateOnly)
+                    {
+                        this.UpdateGridSlow(
+                            () => this.App.Pages.ToolsPages.ToolsMainPage.PopulateSearchField(
+                                (string)filters[FilterSearchData.Filters.Search],
+                                populateOnly));
+                    }
+                    else
+                    {
+                        this.App.Pages.ToolsPages.ToolsMainPage.PopulateSearchField(
+                            (string)filters[FilterSearchData.Filters.Search],
+                            populateOnly);
+                    }
+                }
+             }
 
-            foreach (var filter in filters.Keys)
+
+
+            if (!App.Pages.ToolsPages.FiltersPopup.IsOpened)
+            {         
+              App.Ui.ToolsMain.ClickFiltersButton();
+            }
+
+        foreach (var filter in filters.Keys)
             {
                 if (filters[filter] != null)
                 {
@@ -64,55 +88,54 @@ namespace Tests.Helpers.UI.Inventory
                     {
                         case FilterSearchData.Filters.Search:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.PopulateSearchField((string)filters[filter]);
-                                break;
+                               break;
                             }
 
                         case FilterSearchData.Filters.UsageMaterial:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.PopulateUsageMaterial((string)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.PopulateUsageMaterial((string)filters[filter]);
                                 break;
                             }
 
                         case FilterSearchData.Filters.ToolMaterial:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.PopulateToolMaterial((string)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.PopulateToolMaterial((string)filters[filter]);
                                 break;
                             }
 
                         case FilterSearchData.Filters.ToolSize:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.PopulateToolSize((int)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.PopulateToolSize((int)filters[filter]);
                                 break;
                             }
 
                         case FilterSearchData.Filters.ToolLength:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.PopulateToolLength((int)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.PopulateToolLength((int)filters[filter]);
                                 break;
                             }
 
                         case FilterSearchData.Filters.ToolGroup:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.PopulateToolGroup((string)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.PopulateToolGroup((string)filters[filter]);
                                 break;
                             }
 
-                        case FilterSearchData.Filters.ToolSubGroup:
+                        case FilterSearchData.Filters.Type:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.PopulateToolSubGroup((string)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.PopulateToolType((string)filters[filter]);
                                 break;
                             }
 
                         case FilterSearchData.Filters.Cooling:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.SetCoolingFunctionality((bool)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.SetCoolingFunctionality((bool)filters[filter]);
                                 break;
                             }
 
                         case FilterSearchData.Filters.AvaliabilityInStock:
                             {
-                                this.App.Pages.ToolsPages.ToolsMainPage.SetAvaliabilityInStock((bool)filters[filter]);
+                                this.App.Pages.ToolsPages.FiltersPopup.SetAvaliabilityInStock((bool)filters[filter]);
                                 break;
                             }
                     }
@@ -121,13 +144,14 @@ namespace Tests.Helpers.UI.Inventory
 
             if (!populateOnly)
             {
-                this.App.Pages.ToolsPages.ToolsMainPage.ClickSearchButton();
+                UpdateGridSlow(
+                    () =>
+                        {
+                            this.App.Pages.ToolsPages.FiltersPopup.ClickApplyButton();
 
-                if (!this.App.Pages.Driver.WaitForElementStaleBool(elements.Last(), 10))
-                {
-                    this.App.Logger.Warn("It's possible that grid data wasn't updated");
+                            ServiceMethods.WaitForOperationPositive(() => !App.Pages.ToolsPages.FiltersPopup.IsOpened);
+                        });
                 }
-            }
         }
 
         #region get methods
@@ -161,14 +185,27 @@ namespace Tests.Helpers.UI.Inventory
             return this.GetResultsRecords<Holder>();
         }
 
-        public List<ToolGridRecord> GetGridRecords()
+        public List<ToolGridRecord> GetGridRecords(bool shouldFound = true)
         {
-            return this.App.Pages.ToolsPages.ToolsMainPage.GetRecords();
+            List<ToolGridRecord> records = new List<ToolGridRecord>();
+            int count;
+            int counter = 0;
+            do
+            {
+                records = App.Pages.ToolsPages.ToolsMainPage.GetRecords();
+                count = records.Count;
+            }
+            while (shouldFound && count == 0 && counter++ < 5);
+
+            return records;
+            
         }
+
 
         private List<T> GetResultsRecords<T>()
             where T : class, new()
         {
+            App.Pages.ToolsPages.ToolsMainPage.WaitForPageLoad();
             var uiRecords = this.App.Pages.ToolsPages.ToolsMainPage.GetRecords();
              return this.TransformModels<T>(uiRecords);
          }
@@ -185,8 +222,8 @@ namespace Tests.Helpers.UI.Inventory
                     var tool = new ToolAssembly();
 
                     tool.Name = record.Name;
-                    tool.CutterAssembly = new CutterAssembly { Cutter = new List<Cutter> { new Cutter() } };
-                    tool.CutterAssembly.Cutter[0].Diameter = record.Size;
+                    tool.CutterAssembly = new CutterAssembly { Cutter = new Cutter() };
+                    tool.CutterAssembly.Cutter.Diameter = record.Size;
                     if (record.Length != null) tool.Length = (int)record.Length;
                     tool.Quantity = record.Quantity;
                     resultRecords.Add(tool as T);
@@ -196,8 +233,8 @@ namespace Tests.Helpers.UI.Inventory
                     var tool = new CutterAssembly();
 
                     tool.Name = record.Name;
-                    tool.Cutter = new List<Cutter> {new Cutter()};
-                    tool.Cutter[0].Diameter = record.Size;
+                    tool.Cutter = new Cutter();
+                    tool.Cutter.Diameter = record.Size;
                     if (record.Length != null) tool.Length = (int)record.Length;
                     tool.Quantity = record.Quantity;
                     resultRecords.Add(tool as T);
@@ -259,17 +296,22 @@ namespace Tests.Helpers.UI.Inventory
 
         public int ClickRandomPage()
         {
-           
-            var elements = this.App.Pages.ToolsPages.ToolsMainPage.GetRawGridLineElements();
-          
+            var elements = this.App.Pages.ToolsPages.ToolsMainPage.GetRecords().Select(t => t.Name).ToList();
+
             var pages = this.App.Pages.ToolsPages.ToolsMainPage.GetAvailablePages();
             Random random = new Random();
             var selectedPage = random.Next(1, pages.Count - 1);
             var page = pages[selectedPage];
             this.App.Pages.ToolsPages.ToolsMainPage.ClickPage(page);
 
+            int c = 0;
+            while (this.App.Pages.ToolsPages.ToolsMainPage.GetRecords().Select(t => t.Name).ToList()
+                       .SequenceEqual(elements) && c++ < 10)
+            {
+                Thread.Sleep(1000);
+            }
 
-            if (!this.App.Pages.Driver.WaitForElementStaleBool(elements.Last(), 10))
+            if (c >= 10)
             {
                 this.App.Logger.Warn("Grid data possibly wasn't updated");
             }
@@ -279,7 +321,7 @@ namespace Tests.Helpers.UI.Inventory
 
         public void ClickPage(int pageNumber)
         {                     
-            this.UpdateGrid(() => this.App.Pages.ToolsPages.ToolsMainPage.ClickPage(pageNumber.ToString()), 8);                 
+            this.UpdateGridSlow(() => this.App.Pages.ToolsPages.ToolsMainPage.ClickPage(pageNumber.ToString()), 8);                 
         }
 
         public string ClickRandomTool()
@@ -315,6 +357,7 @@ namespace Tests.Helpers.UI.Inventory
         public void ClickTool(string toolName)
         {
             this.App.Pages.ToolsPages.ToolsMainPage.ClickRecord(toolName);
+            this.App.Pages.ToolsPages.ToolInfoPage.WaitForPageLoad();
         }
 
         public Dictionary<FilterSearchData.Filters, object> GetFiltersStates(List<FilterSearchData.Filters> filters)
@@ -323,8 +366,11 @@ namespace Tests.Helpers.UI.Inventory
 
             foreach (var filter in filters)
             {             
-                    var filterState = this.App.Pages.ToolsPages.ToolsMainPage.GetFilterState(filter);
+                    var filterState = this.App.Pages.ToolsPages.FiltersPopup.GetFilterState(filter);
+                if (filterState != null)
+                {
                     filtersStates.Add(filter, filterState);
+                }
             }
             
             return filtersStates;
@@ -334,7 +380,26 @@ namespace Tests.Helpers.UI.Inventory
         {
             var filtersNames = filters.Keys.ToList();
 
-            return this.GetFiltersStates(filtersNames);
+            Dictionary<FilterSearchData.Filters, object> states = new Dictionary<FilterSearchData.Filters, object>();
+
+            if (filters.ContainsKey(FilterSearchData.Filters.Search))
+            {
+                var searchValue = this.GetSearchFieldValue();
+                states.Add(FilterSearchData.Filters.Search, searchValue);
+            }
+
+            if (!App.Pages.ToolsPages.FiltersPopup.IsOpened)
+            {
+                App.Ui.ToolsMain.ClickFiltersButton();
+            }
+            var popupFiltersStates = GetFiltersStates(filtersNames);
+            var allStates = states.Union(popupFiltersStates).ToDictionary(d => d.Key, d => d.Value);
+            App.Pages.ToolsPages.FiltersPopup.ClickCloseButton();
+            App.Pages.ToolsPages.ToolsMainPage.WaitForPageLoad();
+            return allStates;
+
+
+
         }
 
         public void ClearSearch()
@@ -344,18 +409,24 @@ namespace Tests.Helpers.UI.Inventory
 
         public List<string> GetFilterLabels()
         {
-            this.App.Pages.ToolsPages.ToolsMainPage.WaitForPageLoad();
-            var labels = this.App.Pages.ToolsPages.ToolsMainPage.GetFilterLabels();
+            App.Pages.ToolsPages.ToolsMainPage.ClickFilterButton();
+            this.App.Pages.ToolsPages.FiltersPopup.WaitForPageLoad();
+            var labels = this.App.Pages.ToolsPages.FiltersPopup.GetFilterLabels();
             this.App.Logger.Info("Next filters are available: ");
             labels.ForEach(e => this.App.Logger.Info(e));
             return labels;
         }
 
-        public void ResetSearchAndFilters()
+        public void ResetFiltersAndSearch()
         {
-            this.UpdateGrid(this.App.Pages.ToolsPages.ToolsMainPage.ResetSearchAndFilters, 5);
+            this.UpdateGridSlow(this.App.Pages.ToolsPages.ToolsMainPage.ResetFiltersAndSearch, 10);
         }
-       
+
+        public void ResetFilters()
+        {
+            this.UpdateGridSlow(this.App.Pages.ToolsPages.ToolsMainPage.ResetFilters, 10);
+        }
+
 
         public void SelectToolType(FilterSearchData.ToolsTypes toolsType)
         {           
@@ -393,9 +464,9 @@ namespace Tests.Helpers.UI.Inventory
 
         public void ClickColumnName(FilterSearchData.GridColumnsNames name)
         {
-            this.UpdateGrid(() => this.App.Pages.ToolsPages.ToolsMainPage.ClickColumnName(name.ToString()), 10);
+            this.UpdateGridSlow(() => this.App.Pages.ToolsPages.ToolsMainPage.ClickColumnName(name.ToString()), 10);
         }
-
+        
         #region private methods
         private void UpdateGrid(Action action, int timeoutSeconds = 10)
         {
@@ -407,7 +478,26 @@ namespace Tests.Helpers.UI.Inventory
                     this.App.Logger.Warn("Grid data possibly wasn't updated");
                 }
          }
-               
+
+        private void UpdateGridSlow(Action action, int timeoutSeconds = 10)
+        {
+            var elements = this.App.Pages.ToolsPages.ToolsMainPage.GetRecords().Select(t => t.Name).ToList();
+            action.Invoke();
+
+            int c = 0;
+            while (this.App.Pages.ToolsPages.ToolsMainPage.GetRecords().Select(t => t.Name).ToList()
+                       .SequenceEqual(elements) && c++ < timeoutSeconds)
+            {
+                Thread.Sleep(1000);
+            }
+
+            if (c >= timeoutSeconds)
+            {
+                this.App.Logger.Warn("Grid data possibly wasn't updated");
+            }
+        }
+
+
         #endregion
 
         public List<string> GetGroupsLabels()
@@ -421,8 +511,8 @@ namespace Tests.Helpers.UI.Inventory
                 new Dictionary<string, FilterSearchData.ToolsTypes>
                     {
                         {
-                            "Assemblies",
-                            FilterSearchData.ToolsTypes.Assemblies
+                            "Tools",
+                            FilterSearchData.ToolsTypes.Tools
                         },
                         {
                             "Cutters",
@@ -442,5 +532,21 @@ namespace Tests.Helpers.UI.Inventory
             }
             return toolTypes[type];
         }
+
+        public void ClickFiltersButton()
+        {
+            if (!App.Pages.ToolsPages.FiltersPopup.IsOpened)
+            {
+                App.Pages.ToolsPages.ToolsMainPage.ClickFilterButton();
+                App.Pages.ToolsPages.FiltersPopup.WaitForPageLoad();
+            }
+        }
+
+        public void OpenToolAssemblyDirectly(string assemblyId)
+        {
+            this.App.Ui.UiHelp.NavigateToUrlRelatively($"tools/assemblies/{assemblyId}");
+        }
+
+        public void OpenToolScout() => App.Pages.ToolsPages.ToolsMainPage.OpenToolScout();
     }
 }

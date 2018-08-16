@@ -22,5 +22,7 @@ namespace Tests.Models.ProjectManager.DbModels.Postgres
         public string EditedBy { get; set; }
 
         public DateTime EditedDate { get; set; }
+
+        public int TaskId { get; set; }
     }
 }

@@ -14,14 +14,23 @@ namespace Tests.Helpers.UI.Machines
         {
         }
 
-        public List<TaskAllocationRecord> GetMachinesInfo()
+        public List<TaskAllocationRecord> GetMachinesInfo(bool shouldFind = true, int timeSec = 20)
         {
+            int counter = 0;
             App.Pages.MachinesPages.MachinesTaskAllocationPage.WaitForPageLoad();
-            return App.Pages.MachinesPages.MachinesTaskAllocationPage.GetMachineTasksInfo();
+            List<TaskAllocationRecord> machineInfo = new List<TaskAllocationRecord>();
+            do
+            {
+                machineInfo = App.Pages.MachinesPages.MachinesTaskAllocationPage.GetMachineTasksInfo();
+            }
+            while (shouldFind && machineInfo.Count == 0 && counter++ < timeSec);
+
+            return machineInfo;
         }
 
         public List<string> GetGridColumnsNames()
         {
+            App.Pages.MachinesPages.MachinesTaskAllocationPage.WaitForPageLoad();
             return App.Pages.MachinesPages.MachinesTaskAllocationPage.GetGridColumnNames();
         }
 
@@ -35,9 +44,9 @@ namespace Tests.Helpers.UI.Machines
             return App.Pages.MachinesPages.MachineDetailsPage.GetCurrentTaskInfo();
         }
 
-        public List<TaskAllocationRecord> GetUpcomingTasksInformationFromMachineDetails()
+        public List<TaskAllocationRecord> GetUpcomingTasksInformationFromMachineDetails(bool shouldFind = false, int timeoutSec = 20)
         {
-            return App.Pages.MachinesPages.MachineDetailsPage.GetUpcomingTasks();
+            return App.Pages.MachinesPages.MachineDetailsPage.GetUpcomingTasks(shouldFind, timeoutSec);
         }
 
         public void ClickBackFromMachineDetails()

@@ -6,10 +6,10 @@ namespace Tests.Models.Machines.UiModels
     {
         public string Machine { get; set; }
 
-        public string Workpiece { get; set; }
-
-        public string Qty { get; set; }
-
+        public string Duration { get; set; }
+        
+        public string WorkpieceName { get; set; }
+        
         public string CurrentTask { get; set; }
 
         public string ActualStart { get; set; }
@@ -19,7 +19,7 @@ namespace Tests.Models.Machines.UiModels
         public string EstimatedEnd { get; set; }
 
         // 'Next task' for machine details page
-        public string UpcomingTask { get; set; }
+        public string UpcomingWorkpiece { get; set; }
 
         public string DeliveryDate { get; set; }
 

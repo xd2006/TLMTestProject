@@ -17,9 +17,9 @@ namespace Tests.Models.ToolManager.GraphQlModels.ToolAssembly
 
         public List<string> UsageMaterials { get; set; }
 
-        public List<Cutter> Cutter { get; set; }
+        public Cutter Cutter { get; set; }
 
-        public CuttingMaterial CuttingMaterial { get; set; }
+        public Material Material { get; set; }
 
         public ExchangablePlate ExchangablePlate { get; set; }
 

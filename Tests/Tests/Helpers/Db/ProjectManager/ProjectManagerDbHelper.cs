@@ -3,10 +3,9 @@ namespace Tests.Helpers.Db.ProjectManager
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Runtime.InteropServices;
 
     using global::Tests.Managers;
-    using global::Tests.Models.ProjectManager.DbModels;
     using global::Tests.Models.ProjectManager.DbModels.Postgres;
 
     using PetaPoco;
@@ -24,7 +23,7 @@ namespace Tests.Helpers.Db.ProjectManager
 
         public Task GetTask(int id)
         {
-            return Db.Single<Task>(id);
+            return GetEntity<Task>(id);
         }
 
         public List<Task> GetTasks()
@@ -34,7 +33,7 @@ namespace Tests.Helpers.Db.ProjectManager
 
         public List<Task> GetTasks(Sql query)
         {
-            return Db.Fetch<Task>(query);
+            return GetEntities<Task>(query);
         }
 
         public List<Task> GetActiveTasksForMachine(int machineId)
@@ -49,7 +48,7 @@ namespace Tests.Helpers.Db.ProjectManager
 
         public Order GetOrder(int id)
         {
-            return Db.Single<Order>(id);
+            return GetEntity<Order>(id);
         }
 
         public List<Order> GetOrders(Sql query)
@@ -59,39 +58,49 @@ namespace Tests.Helpers.Db.ProjectManager
        
         public Workpiece GetWorkpiece(int workpieceId)
         {
-            return Db.Single<Workpiece>(workpieceId);
+            return GetEntity<Workpiece>(workpieceId);
         }
 
         public Workplan GetWorkplan(int workplanId)
         {
-            return Db.Single<Workplan>(workplanId);
+            return GetEntity<Workplan>(workplanId);
         }
 
         public List<Workpiece> GetWorkpieces()
         {
-            return Db.Fetch<Workpiece>(string.Empty);
+            return GetEntities<Workpiece>(new Sql(string.Empty));
         }
 
         public List<Workplan> GetWorkplans(Sql query)
         {
-            return Db.Fetch<Workplan>(query);
+            return GetEntities<Workplan>(query);
         }
        
         public List<Workplan> GetWorkplans()
         {
-            return Db.Fetch<Workplan>(string.Empty);
+            return GetEntities<Workplan>(new Sql(string.Empty));
         }
 
         public List<Task> GeTasks()
         {
-            return Db.Fetch<Task>(string.Empty);
+            return GetEntities<Task>(new Sql(string.Empty));
         }
 
         public List<Task> GeTasks(Sql query)
         {
-            return Db.Fetch<Task>(query);
+            return GetEntities<Task>(query);
         }
-        
+
+        public List<File> GetFiles()
+        {
+            return GetEntities<File>(new Sql(string.Empty));
+        }
+
+        public List<File> GetFiles(Sql query)
+        {
+            return GetEntities<File>(query);
+        }
+
         public void CleanDb()
         {
             Db.Delete<Workplan>("*");

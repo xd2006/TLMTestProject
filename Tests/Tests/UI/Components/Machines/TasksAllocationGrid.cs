@@ -39,13 +39,11 @@ namespace Tests.UI.Components.Machines
                 
                 var cellsTexts = cells.Select(t => t.TextContent).ToList();
                 taskAllocation.Machine = cellsTexts[0];
-                taskAllocation.Workpiece = cellsTexts[1];
-                taskAllocation.Qty = cellsTexts[2];
-                taskAllocation.CurrentTask = cellsTexts[3];
-                taskAllocation.ActualStart = cellsTexts[4];
-                taskAllocation.EstimatedDuration = cellsTexts[5];
-                taskAllocation.EstimatedEnd = cellsTexts[6];
-                taskAllocation.UpcomingTask = cellsTexts[7];
+                taskAllocation.WorkpieceName = cellsTexts[1];
+                taskAllocation.CurrentTask = cellsTexts[2];
+                taskAllocation.EstimatedDuration = cellsTexts[3];
+                taskAllocation.EstimatedEnd = cellsTexts[4];
+                taskAllocation.UpcomingWorkpiece = cellsTexts[5];
                 tasks.Add(taskAllocation);
             }
 

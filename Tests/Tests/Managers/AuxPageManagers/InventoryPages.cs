@@ -16,6 +16,12 @@ namespace Tests.Managers.AuxPageManagers
 
         private InventoryToolInformationPopup toolInfoPopup;
 
+        private InventoryCutterInformationPopup cutterInfoPopup;
+
+        private InventoryFilterPopup filtersPopup;
+
+        private CreateNewToolPopup _newToolPopup;
+
         public InventoryPages(IWebDriver driver)
             : base(driver)
         {
@@ -25,6 +31,11 @@ namespace Tests.Managers.AuxPageManagers
 
         public InventoryToolInformationPopup ToolInfoPage => this.toolInfoPopup ?? (this.toolInfoPopup = new InventoryToolInformationPopup(this.Driver));
 
-    }
-    
+        public InventoryFilterPopup FiltersPopup =>
+            this.filtersPopup ?? (this.filtersPopup = new InventoryFilterPopup(Driver));
+
+        public CreateNewToolPopup NewToolPopup => this._newToolPopup ?? (this._newToolPopup = new CreateNewToolPopup(this.Driver));
+
+        public InventoryCutterInformationPopup CutterInfoPage => this.cutterInfoPopup ?? (this.cutterInfoPopup = new InventoryCutterInformationPopup(this.Driver));
+    }  
 }

@@ -4,6 +4,7 @@ namespace Tests.UI.Pages.Link
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
 
     using Core.WeDriverService;
     using Core.WeDriverService.Extensions;
@@ -14,15 +15,15 @@ namespace Tests.UI.Pages.Link
 
     public class LinkPage : AnyPage
     {
-        private By linkItemInfoElementLocator = By.CssSelector("div[class$='link-item_info']");
+        private By linkItemInfoElementLocator = By.CssSelector("div[class$='linkItems'] > div");
 
         private By linkItemInputFieldLocator = By.CssSelector("input[name = 'code']");
 
         private By newLinkButtonLocator = By.XPath("//button[./span[contains(.,'New')]]");
 
-        private By validResultsMessageLocator = By.CssSelector("fake selector"); //Todo: update after reproducing success scenario
+        private By validResultsMessageLocator = By.CssSelector("div[class$='success']>div[class$='content']");
 
-        private By invalidResultsMessageLocator = By.CssSelector("div[class$='linkAlert']>div[class$='failure']");
+        private By invalidResultsMessageLocator = By.CssSelector("div[class$='error']>div[class$='content']");
 
         private By CloseButtonLocator = By.CssSelector("button[class$='close']");
 
@@ -55,7 +56,22 @@ namespace Tests.UI.Pages.Link
 
         public void PopulateItem(int itemNumber, string itemGuid)
         {
-            Driver.Finds(this.linkItemInputFieldLocator).ToList()[itemNumber - 1].SendKeys(itemGuid + Keys.Enter);
+            int count;
+            int c = 0;
+            do
+            {
+                if (c > 0)
+                {
+                    Thread.Sleep(500);
+                }
+                count = Driver.Finds(this.linkItemInputFieldLocator).ToList().Count;
+            }
+            while (count < itemNumber && c++ < 20);
+
+            var inputField = Driver.Finds(this.linkItemInputFieldLocator).ToList()[itemNumber - 1];
+
+            inputField.SendKeys(itemGuid);
+            inputField.SendKeys(Keys.Enter);
         }
 
         public void ClickNewLinkButton()

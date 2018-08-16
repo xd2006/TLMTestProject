@@ -65,7 +65,7 @@ namespace Tests.Tests.Inventory
         [Property("Reference", "TLM-70")]
         public void AssembliesEmptySearchGrid()
         {
-            this.CheckEmptySearchGridTest(FilterSearchData.ToolsTypes.Assemblies);
+            this.CheckEmptySearchGridTest(FilterSearchData.ToolsTypes.Tools);
         }
         
         [Test]

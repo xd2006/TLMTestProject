@@ -1,4 +1,6 @@
 ﻿
+using RestSharp;
+
 namespace Tests.Helpers.Api
 {
     using global::Tests.ApiRequests;
@@ -22,6 +24,15 @@ namespace Tests.Helpers.Api
             this.App.Logger.Info($"Request was processed");
             return instance;
         }
-          #endregion
+        #endregion
+
+        public IRestResponse DownloadFile(string link)
+        {
+            var client = CreateClient(link);
+            var request = new CustomRestRequest()
+                .WithMethod(Method.GET)
+                .Build();
+            return Execute(client, request);         
+        }
     }
 }

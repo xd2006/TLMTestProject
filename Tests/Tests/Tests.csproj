@@ -116,6 +116,7 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.1\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.4.0\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
@@ -125,8 +126,9 @@
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="WebDriver, Version=3.12.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Selenium.WebDriver.3.12.0\lib\net45\WebDriver.dll</HintPath>
+    <Reference Include="System.Xml" />
+    <Reference Include="WebDriver, Version=3.14.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Selenium.WebDriver.3.14.0\lib\net45\WebDriver.dll</HintPath>
     </Reference>
     <Reference Include="WebDriver.Support, Version=3.12.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Selenium.Support.3.12.0\lib\net45\WebDriver.Support.dll</HintPath>
@@ -137,21 +139,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiRequests\TempRequests.cs" />
+    <Compile Include="Helpers\Api\CustomRestRequest.cs" />
     <Compile Include="Helpers\Preconditions\PreconditionsHelper.cs" />
     <Compile Include="Helpers\UI\Link\UiLinkHelper.cs" />
     <Compile Include="Helpers\UI\Machines\UiMachinesHelper.cs" />
     <Compile Include="Helpers\UI\Main\UiMainHelper.cs" />
     <Compile Include="Helpers\UI\Orders\UiOrdersOrderHelper.cs" />
+    <Compile Include="Helpers\UI\Orders\UiOrdersTaskHelper.cs" />
     <Compile Include="Helpers\UI\Orders\UiOrdersWorkpieceHelper.cs" />
+    <Compile Include="Helpers\UI\ToDo\UiToDoHelper.cs" />
+    <Compile Include="Helpers\UI\ToolScout\UiToolScoutHelper.cs" />
     <Compile Include="Managers\AuxPageManagers\GeneralPages.cs" />
     <Compile Include="Managers\AuxPageManagers\MachinesPages.cs" />
     <Compile Include="Models\Machines\UiModels\TaskAllocationRecord.cs" />
     <Compile Include="Models\ProjectManager\GraphQlModels\Machine.cs" />
+    <Compile Include="Models\ProjectManager\UiModels\FilesGridRecord.cs" />
     <Compile Include="Models\ProjectManager\UiModels\WorkpieceGridRecord.cs" />
     <Compile Include="Models\ProjectManager\UiModels\TaskGridRecord.cs" />
-    <Compile Include="Models\ToolManager\UiModels\InstanceInStockGridRecord.cs" />
+    <Compile Include="Models\ToDo\UiModels\ToDoJobRecord.cs" />
+    <Compile Include="Models\ToolManager\UiModels\CutterInstanceGridRecord.cs" />
+    <Compile Include="Models\ToolManager\UiModels\ToolInstanceGridRecord.cs" />
     <Compile Include="TestsData\Common\Enums\SidePanelData.cs" />
+    <Compile Include="TestsData\Inventory\Enums\CreateToolInstancePopup.cs" />
     <Compile Include="TestsData\Orders\Enums\CreateOrderPopup.cs" />
+    <Compile Include="TestsData\Orders\Enums\CreateWorkpiecePopup.cs" />
     <Compile Include="TestsData\Orders\Enums\GeneralData.cs" />
     <Compile Include="TestsData\Orders\Enums\WorkpieceDetails.cs" />
     <Compile Include="TestsData\Inventory\Enums\FilterSearch\FilterSearchData.cs" />
@@ -203,7 +214,7 @@
     <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\Cutter.cs" />
     <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\CutterAssembly.cs" />
     <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\CutterGroup.cs" />
-    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\CuttingMaterial.cs" />
+    <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\Material.cs" />
     <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\ExchangablePlate.cs" />
     <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\Holder.cs" />
     <Compile Include="Models\ToolManager\GraphQlModels\ToolAssembly\ToolAssembly.cs" />
@@ -218,6 +229,8 @@
     <Compile Include="TestsData\Orders\OrdersData.cs" />
     <Compile Include="Tests\General\GeneralTests.cs" />
     <Compile Include="Tests\General\Templates\GeneralTestTemplate.cs" />
+    <Compile Include="Tests\Inventory\CutterDetailsTest.cs" />
+    <Compile Include="Tests\Inventory\ToolScoutTests.cs" />
     <Compile Include="Tests\Link\LinkGeneralTests.cs" />
     <Compile Include="Tests\Link\Templates\LinkTestsTemplate.cs" />
     <Compile Include="Tests\Machines\MachinesGeneralTests.cs" />
@@ -225,6 +238,8 @@
     <Compile Include="Tests\Orders\OrdersGeneralTests.cs" />
     <Compile Include="Tests\Orders\OrderMutationsTests.cs" />
     <Compile Include="Tests\Orders\OrderTests.cs" />
+    <Compile Include="Tests\Orders\OrderWorkpieceTaskTests.cs" />
+    <Compile Include="Tests\Orders\OrderWorkpieceTests.cs" />
     <Compile Include="Tests\Orders\Service\DbService.cs" />
     <Compile Include="Tests\Orders\Templates\OrdersTestTemplate.cs" />
     <Compile Include="Tests\TestBase.cs" />
@@ -242,23 +257,38 @@
     <Compile Include="Tests\Inventory\AssemblySearchTests.cs" />
     <Compile Include="Tests\Inventory\ToolInformationTests.cs" />
     <Compile Include="Tests\Inventory\Templates\InventoryTestsTemplate.cs" />
+    <Compile Include="Tests\ToDo\Templates\ToDoTestTemplate.cs" />
+    <Compile Include="Tests\ToDo\ToDoTests.cs" />
     <Compile Include="UI\Components\ComponentTemplate.cs" />
+    <Compile Include="UI\Components\General\CustomSelector.cs" />
     <Compile Include="UI\Components\General\SidePanel.cs" />
     <Compile Include="UI\Components\GridTemplate.cs" />
     <Compile Include="UI\Components\Interfaces\IGrid.cs" />
+    <Compile Include="UI\Components\Interfaces\ISelector.cs" />
     <Compile Include="UI\Components\Machines\TasksAllocationGrid.cs" />
     <Compile Include="UI\Components\Machines\UpcomingTasksGrid.cs" />
+    <Compile Include="UI\Components\Orders\FilesGrid.cs" />
     <Compile Include="UI\Components\Orders\OrdersGrid.cs" />
+    <Compile Include="UI\Components\Orders\TaskRequiredToolsGrid.cs" />
     <Compile Include="UI\Components\Orders\WorkpiecesGrid.cs" />
     <Compile Include="UI\Components\Orders\WorkplanTasksGrid.cs" />
-    <Compile Include="UI\Components\Tools\InstancesInStockGrid.cs" />
+    <Compile Include="UI\Components\ToDo\ToDoJobsGrid.cs" />
+    <Compile Include="UI\Components\Tools\CutterInstancesGrid.cs" />
+    <Compile Include="UI\Components\Tools\ToolInstancesGrid.cs" />
     <Compile Include="UI\Components\Tools\ToolsGrid.cs" />
     <Compile Include="UI\Pages\General\AnyPage.cs" />
     <Compile Include="UI\Pages\General\DashboardPage.cs" />
     <Compile Include="UI\Pages\General\SettingsPage.cs" />
+    <Compile Include="UI\Pages\Inventory\CreateNewToolPopup.cs" />
+    <Compile Include="UI\Pages\Inventory\InventoryCutterInformationPopup.cs" />
+    <Compile Include="UI\Pages\Inventory\InventoryFilterPopup.cs" />
+    <Compile Include="UI\Pages\Inventory\Templates\InformationPopupTemplate.cs" />
     <Compile Include="UI\Pages\Link\LinkPage.cs" />
     <Compile Include="UI\Pages\Machines\MachineDetailsPage.cs" />
     <Compile Include="UI\Pages\Machines\MachinesTaskAllocationPage.cs" />
+    <Compile Include="UI\Pages\Orders\OrdersCreateTaskPopup.cs" />
+    <Compile Include="UI\Pages\Orders\OrdersCreateWorkpiecePopup.cs" />
+    <Compile Include="UI\Pages\Orders\OrdersWorkpieceTaskRequiredToolsPage.cs" />
     <Compile Include="UI\Pages\PagesTemplates\PageWithGridTemplate.cs" />
     <Compile Include="UI\Pages\Orders\OrdersCreateOrderPopup.cs" />
     <Compile Include="UI\Pages\Orders\OrdersMainPage.cs" />
@@ -268,6 +298,7 @@
     <Compile Include="UI\Pages\Inventory\InventoryMainPage.cs" />
     <Compile Include="UI\Pages\Inventory\InventoryToolInformationPopup.cs" />
     <Compile Include="UI\Pages\Todo\TodoPage.cs" />
+    <Compile Include="UI\Pages\ToolScout\ToolScoutPage.cs" />
     <Compile Include="UI\UIElementTemplate.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -278,13 +309,42 @@
     <Content Include="TestsData\Orders\Files\InValidCamFile.hh">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="TestsData\Orders\Files\InvalidDataCamFile.h">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Length_sorting T.tif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Length_sorting TT.tiff">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Length_sorting.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Length_sorting.jpeg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Length_sorting.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestsData\Orders\Files\Length_sorting.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Logs.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\MicrosoftWebDriver.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\valid1.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestsData\Orders\Files\ValidCamFile.h">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestsData\Orders\Files\ValidCamFile2.h" />
+    <Content Include="TestsData\Orders\Files\ValidCamFile2.h">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
@@ -302,9 +362,42 @@
     <None Include="ReportPortal.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="TestsData\Orders\Files\Test upload file.docx">
+    <Content Include="TestsData\Orders\Files\RP_PDF_Report.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="TestsData\Orders\Files\RP_Report.ppt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\RP_Report.pptx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Test upload file - S.stp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Test upload file.doc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Test upload file.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Test upload file.pst">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Test XLS.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\Test XLSX.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\MicrosoftWebDriver.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\MicrosoftWebDriver.com">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestsData\Orders\Files\TestFileBat.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

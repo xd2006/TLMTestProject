@@ -67,9 +67,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
-    <Reference Include="WebDriver, Version=3.12.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\Tests\packages\Selenium.WebDriver.3.12.0\lib\net45\WebDriver.dll</HintPath>
+    <Reference Include="System.Xml" />
+    <Reference Include="WebDriver, Version=3.14.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\Tests\packages\Selenium.WebDriver.3.14.0\lib\net45\WebDriver.dll</HintPath>
     </Reference>
     <Reference Include="WebDriver.Support, Version=3.12.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\Tests\packages\Selenium.Support.3.12.0\lib\net45\WebDriver.Support.dll</HintPath>
@@ -82,6 +84,14 @@
     <Compile Include="Service\JsonProcess\NewtonsoftCustom.cs" />
     <Compile Include="Service\JsonProcess\SerializingMethods.cs" />
     <Compile Include="Service\NunitMethods.cs" />
+    <Compile Include="Service\Serialization\Deserializer\CustomDeserialization.cs" />
+    <Compile Include="Service\Serialization\Deserializer\JsonDeserialization.cs" />
+    <Compile Include="Service\Serialization\Deserializer\XmlDeserialization.cs" />
+    <Compile Include="Service\Serialization\Serializer\CustomSerialization.cs" />
+    <Compile Include="Service\Serialization\Serializer\JsonSerialization.cs" />
+    <Compile Include="Service\Serialization\Serializer\XmlSerialization.cs" />
+    <Compile Include="Utils\FileUtils.cs" />
+    <Compile Include="Utils\WaitUtil.cs" />
     <Compile Include="WeDriverService\Extensions\CheckDriverExtensions.cs" />
     <Compile Include="WeDriverService\Extensions\SetupDriverExtensions.cs" />
     <Compile Include="WeDriverService\Extensions\WaitsDriverExtensions.cs" />

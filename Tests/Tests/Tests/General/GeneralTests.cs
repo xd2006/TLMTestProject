@@ -17,10 +17,14 @@ namespace Tests.Tests.General
         [Test]
         [Category("UI")]
         [Property("Reference", "TLM-161")]
+        [Property("Reference", "TLM-224")]
         [Property("TestCase", "1228")]
         [Property("TestCase", "1232")]
         [Property("TestCase", "1237")]
         [Property("TestCase", "1238")]
+        [Property("TestCase", "2277")]
+        [Property("TestCase", "2278")]
+
         public void CheckSideNavigationPanel()
         {
            

@@ -11,21 +11,23 @@ namespace Tests.Tests.Orders
     using NUnit.Framework;
 
     [TestFixture]
-    [Parallelizable(ParallelScope.All)]
+    [Parallelizable(ParallelScope.Fixtures)]
     [Category("ProjectManagerGeneral")]
     public class PmGeneralTests : OrdersTestTemplate
-    {      
+    {    
+        
         [Test]
         [Category("UI")]
         [Property("Reference", "TLM-145")]
         [Property("TestCase", "693")]
+       
         public void CheckProjectManagerGridContent()
         {
             var expectedColumns = new List<string>
                                       {
                                           "Order ID",
                                           "Customer",
-                                          "Delivery Date",
+                                          "Delivery date",
                                           "Editor",
                                           "Creation Date"
                                       };
@@ -36,7 +38,7 @@ namespace Tests.Tests.Orders
             }
 
             var names = this.App.Ui.OrdersMain.GetColumnsNames();
-
+            
             Assert.That(names.SequenceEqual(expectedColumns), "Grid columns names are not as expected");
         }
 
@@ -48,6 +50,7 @@ namespace Tests.Tests.Orders
         [Property("TestCase", "697")]
         [Property("TestCase", "698")]
         [Property("TestCase", "699")]
+     
         public void ProjectManagerCheckPaging()
         {
             this.App.GraphApi.ProjectManager.AddOrdersIfNeeded(26);
@@ -75,6 +78,7 @@ namespace Tests.Tests.Orders
         [Category("UI")]
         [Property("TestCase", "696")]
         [Property("Reference", "TLM-145")]
+      
         public void PageManagerPageQuantity()
         {
             this.App.GraphApi.ProjectManager.AddOrdersIfNeeded(26);
@@ -85,16 +89,16 @@ namespace Tests.Tests.Orders
 
                 Assert.AreEqual(quantityByDefault, actualGridSize);
 
-                var results = this.App.Ui.OrdersMain.GetOrderGridRecords();
+                var results = this.App.Ui.OrdersMain.GetOrderGridRecords(true, 50);
 
                 Assert.AreEqual(quantityByDefault, results.Count, "Results quantity option doesn't work");
 
-                results = this.App.Ui.OrdersMain.GetOrderGridRecords();
+                results = this.App.Ui.OrdersMain.GetOrderGridRecords(true, 50);
 
                 Assert.AreEqual(quantityByDefault, results.Count, "Results quantity option doesn't work");
 
                 this.App.Ui.OrdersMain.SetMaximumNumberOfResults(10);
-                results = this.App.Ui.OrdersMain.GetOrderGridRecords();
+                results = this.App.Ui.OrdersMain.GetOrderGridRecords(true, 50);
 
                 Assert.AreEqual(10, results.Count, "Results quantity option doesn't work");
             }

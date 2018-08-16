@@ -20,7 +20,7 @@ namespace Tests.Tests.Inventory
         [Property("Reference", "TLM-70")]
         public void CheckGroupsNames()
         {
-            List<string> expectedNames = new List<string> { "Assemblies", "Cutters", "Holders" };
+            List<string> expectedNames = new List<string> { "Tools", "Cutters", "Holders" };
             var names = this.App.Ui.ToolsMain.GetGroupsLabels();
             Assert.True(names.SequenceEqual(expectedNames), "Tool groups selection buttons have incorrect names");
         }
@@ -52,7 +52,9 @@ namespace Tests.Tests.Inventory
             foreach (var result in results)
             {
                 var resList = this.App.GraphApi.ToolManager.SearchCutters(result.Name);
-                Assert.True(resList.Count.Equals(1), $"TA '{result.Name}' from Ui wasn't found in API");
+                Assert.True(
+                    resList.Count >= 1 && results.Where(r => r.Name == result.Name).ToList().Count <= resList.Count,
+                    $"TA '{result.Name}' from Ui wasn't found in API");
             }
         }
 
@@ -78,7 +80,7 @@ namespace Tests.Tests.Inventory
         [Category("UI")]
         [Property("TestCase", "174")]
         [Property("Reference", "TLM-70")]
-        public void ResettingFiltersAfterSwithcingToolTypeTabs()
+        public void ResettingFiltersAfterSwitchingToolTypeTabs()
         {
             Dictionary<FilterSearchData.Filters, object> filters =
                 new Dictionary<FilterSearchData.Filters, object>
@@ -105,14 +107,14 @@ namespace Tests.Tests.Inventory
             Assert.That(!resultsCutters.SequenceEqual(results), "Results grid wasn't updated");
 
             filters.Remove(FilterSearchData.Filters.ToolSize);
+
             this.App.Ui.ToolsMain.PerformFiltering(filters);
 
             this.App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Holders);
-            
+            App.Ui.ToolsMain.ClickFiltersButton();
 
             List<FilterSearchData.Filters> holderFilters = new List<FilterSearchData.Filters>
                                                                {
-                                                                      FilterSearchData.Filters.Search,
                                                                       FilterSearchData.Filters.ToolLength,
                                                                       FilterSearchData.Filters.Cooling,
                                                                       FilterSearchData.Filters.AvaliabilityInStock

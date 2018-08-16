@@ -1,4 +1,8 @@
 ﻿
+using Bogus;
+using Tests.TestsData.Common.Enums;
+using Tests.TestsData.Inventory.Enums;
+
 namespace Tests.Tests.Inventory
 {
     using System;
@@ -64,52 +68,58 @@ namespace Tests.Tests.Inventory
         [Property("TestCase", "152")]
         [Property("Reference", "TLM-63")]
         [Property("Reference", "TLM-73")]
+        [Property("Reference", "TLM-364")]
         public void ToolAssemblyDetailsPopUpContent()
         {
-            List<string> expectedFields = new List<string>
+            var expectedFields = new List<string>
                                               {
-                                                  "Short description",
-                                                  "Name",
+                                                  "Tool type",
                                                   "Size",
                                                   "Length",
-                                                  "Quantity",
+                                                  "Quantity in stock",
                                                   "Operating depth",
-                                                  "Usage material",
-                                                  "Maximum lifetime usage allowed"
+                                                  "Max lifetime usage",
+                                                  "Short description",
+                                                  "Usage material"
                                               };
+            var expectedRelatedComponentFields = new List<string> { "Component name", "Quantity" };
 
-            List<string> expectedRelatedComponentFields = new List<string> { "Component name", "Quantity" };
-
-            this.App.Ui.ToolsMain.ClickRandomTool();
-            var actualFields = this.App.Ui.ToolManagerToolInfo.GetToolInfoFieldsNames();
+            App.Ui.ToolsMain.ClickRandomTool();
+            var actualFields = App.Ui.ToolManagerToolInfo.GetToolInfoFieldsNames();
 
             Assert.That(expectedFields.SequenceEqual(actualFields), "Tool assembly details data is not as expected");
 
-            var actualRelatedComponentsFields = this.App.Ui.ToolManagerToolInfo.GetToolInfoRelatedComponentsFieldsNames();
+            var actualRelatedComponentsFields = App.Ui.ToolManagerToolInfo.GetToolInfoRelatedComponentsFieldsNames();
 
-            Assert.That(
-                expectedRelatedComponentFields.SequenceEqual(actualRelatedComponentsFields),
+            if (Parameters.Parameters.Browser != "MicrosoftEdge")
+            {
+                expectedRelatedComponentFields = ServiceMethods.StringListToUpper(expectedRelatedComponentFields);
+            }
+
+            Assert.That(expectedRelatedComponentFields.SequenceEqual(actualRelatedComponentsFields),
                 "Tool assembly related components data is not as expected");
-
-
-
         }
 
         [Test]
         [Category("UI")]
-        [Property("TestCase", "701")]       
         [Property("Reference", "TLM-70")]
-       public void CutterDetailsPopUpContent()
+        [Property("Reference", "TLM-364")]
+        [Property("Reference", "TLM-325")]
+        [Property("TestCase", "2848")]
+        public void CutterDetailsPopUpContent()
         {
             List<string> expectedFields = new List<string>
                                               {
-                                                  "Name",
+                                                  "Cutter type",
                                                   "Size",
                                                   "Length",
-                                                  "Quantity",
+                                                  "Quantity in stock",
+                                                  "Price",
+                                                  "Supplier",
                                                   "Operating depth",
-                                                  "Usage material",
-                                                  "Maximum lifetime usage allowed"
+                                                  "Max lifetime usage",
+                                                  "Description",
+                                                  "Usage material"
                                               };
             this.App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Cutters);
             this.App.Ui.ToolsMain.ClickRandomTool();
@@ -117,39 +127,69 @@ namespace Tests.Tests.Inventory
 
             Assert.That(expectedFields.SequenceEqual(actualFields), "Cutter assembly details data is not as expected");
             
+            Assert.Multiple(
+                () =>
+                {
+                    Assert.That(App.Ui.ToolManagerToolInfo.IsPictureVisible, "There is no picture");
+                    Assert.That(App.Ui.ToolManagerToolInfo.IsActionBtnVisible, "There is no Dotted menu button");
+                    Assert.That(App.Ui.ToolManagerToolInfo.IsPurchaseBtnVisible, "There is no Purchase button");
+                });
 
-
+            var title = App.Ui.ToolManagerToolInfo.GetDetailsTabTitle;
+            var cutterInfo = App.Ui.ToolManagerToolInfo.GetCutterInfo();
+            Assert.AreEqual(ServiceMethods.RemoveInnerWhitespaces(title), ServiceMethods.RemoveInnerWhitespaces(cutterInfo.Name),
+                "Title and name are not the same");
         }
 
         [Test]
         [Category("UI")]
-        [Property("TestCase", "707")]
         [Property("Reference", "TLM-70")]
+        [Property("Reference", "TLM-364")]
+        [Property("Reference", "TLM-325")]
+        [Property("TestCase", "2849")]
         public void HolderDetailsPopUpContent()
         {
             List<string> expectedFields = new List<string>
                                               {
-                                                  "Name",
+                                                  "Holder type",
                                                   "Length",
-                                                  "Quantity"                                                 
+                                                  "Quantity in stock",
+                                                  "Price",
+                                                  "Supplier",
+                                                  "Description"                                               
                                               };
             this.App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Holders);
             this.App.Ui.ToolsMain.ClickRandomTool();
             var actualFields = this.App.Ui.ToolManagerToolInfo.GetToolInfoFieldsNames();
 
             Assert.That(expectedFields.SequenceEqual(actualFields), "Holder details data is not as expected");
+
+            Assert.Multiple(
+                () =>
+                {
+                    Assert.That(App.Ui.ToolManagerToolInfo.IsPictureVisible, "There is no picture");
+                    Assert.That(App.Ui.ToolManagerToolInfo.IsActionBtnVisible, "There is no Dotted menu button");
+                    Assert.That(App.Ui.ToolManagerToolInfo.IsPurchaseBtnVisible, "There is no Purchase button");
+                });
+
+            var title = App.Ui.ToolManagerToolInfo.GetDetailsTabTitle;
+            var cutterInfo = App.Ui.ToolManagerToolInfo.GetHolderInfo();
+            Assert.AreEqual(ServiceMethods.RemoveInnerWhitespaces(title), ServiceMethods.RemoveInnerWhitespaces(cutterInfo.Name),
+                "Title and name are not the same");
         }
+    
 
         [Test]
         [Category("UI")]
         [Property("Reference", "TLM-70")]
+        [Property("Reference", "TLM-364")]
         [Property("TestCase", "712")]
         public void CutterDetailsPopUpData()
         {          
             CutterAssembly expectedTool = new CutterAssembly();
             expectedTool.Name = "000A300Q08514000";
-            expectedTool.Cutter = new List<Cutter> { new Cutter() };
-            expectedTool.Cutter.First().Diameter = 85000000;
+            expectedTool.Cutter = new Cutter();
+            expectedTool.Cutter.Diameter = 85000000;
             expectedTool.Length = 400000000;
             expectedTool.Quantity = 0;
             expectedTool.UsageMaterials = new List<string> { "PANTERA ALU", "PANTERA STAHL", "PANTERA WZ.STAHL", "STAHL", "STANDARD" };
@@ -166,13 +206,14 @@ namespace Tests.Tests.Inventory
         [Test]
         [Category("UI")]
         [Property("Reference", "TLM-70")]
+        [Property("Reference", "TLM-364")]
         [Property("TestCase", "713")]
         public void HolderDetailsPopUpData()
         {
             Holder expectedTool = new Holder();
-            expectedTool.Name = "D16      SCHRUMPF POKOLM        EL100 HSK50";
-            expectedTool.Length = 126000000;
-            expectedTool.Quantity = 16;
+            expectedTool.Name = "D04         SCHRUMPF POKOLM        EL050  GL076 HSK63";
+            expectedTool.Length = 76000000;
+            expectedTool.Quantity = 2;
 
             this.App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Holders);
             this.App.Ui.ToolsMain.PerformSearch(expectedTool.Name);
@@ -238,7 +279,7 @@ namespace Tests.Tests.Inventory
         [Test]
         [Category("UI")]
         //outdated [Property("TestCase", "703")]
-        [Property("TestCase", "705")]
+//        [Property("TestCase", "705")]
         [Property("Reference", "TLM-70")]
         public void KeepCutterSearchStateAfterClosingToolsInfoPopUp()
         {
@@ -250,9 +291,8 @@ namespace Tests.Tests.Inventory
             var infoBefore = this.App.Ui.ToolManagerToolInfo.GetCutterInfo();
             this.App.Ui.ToolManagerToolInfo.CloseInfoPage();
 
-            var results = App.Ui.ToolsMain.GetCuttersResults().Select(r => r.Name).ToList();
-            Assert.True(!results.Contains(toolName), "Grid state wasn't updated");
-
+            ServiceMethods.WaitForOperationNegative(() => App.Ui.ToolsMain.GetCuttersResults().Select(r => r.Name).ToList().Contains(toolName), 20);
+            
             this.App.Ui.ToolsMain.PerformSearch(searchTerm);
 
             this.App.Ui.ToolsMain.ClickTool(toolName);
@@ -264,7 +304,7 @@ namespace Tests.Tests.Inventory
         [Test]
         [Category("UI")]
         // outdated[Property("TestCase", "709")]
-        [Property("TestCase", "711")]
+//        [Property("TestCase", "711")]
         [Property("Reference", "TLM-70")]
         public void KeepHolderSearchStateAfterClosingToolsInfoPopUp()
         {
@@ -327,8 +367,8 @@ namespace Tests.Tests.Inventory
             int i = 1;
             foreach (var info in relatedComponentsInfo)
             {
-                var expectedValue = i % 2 == 0 ? toolWithExpPlate.CutterAssembly.Cutter.First().EdgeNr : 1;
-                Assert.AreEqual(expectedValue, info.Value, "Wrong related components quantity is displayed");
+                var expectedValue = i % 2 == 0 ? toolWithExpPlate.CutterAssembly.Cutter.EdgeNr : 1;
+                Assert.AreEqual(expectedValue, info.Quantity, "Wrong related components quantity is displayed");
                 i++;
             }
 
@@ -340,7 +380,7 @@ namespace Tests.Tests.Inventory
             foreach (var info in relatedComponentsInfo)
             {
                 var expectedValue = 1;
-                Assert.AreEqual(expectedValue, info.Value, "Wrong related components quantity is displayed");
+                Assert.AreEqual(expectedValue, info.Quantity, "Wrong related components quantity is displayed");
                 i++;
             }
         }
@@ -354,7 +394,6 @@ namespace Tests.Tests.Inventory
         {
             List<string> expectedColumnNames = new List<string>
                                                    {
-                                                       "Name",
                                                        "ID",
                                                        "Size",
                                                        "Length",
@@ -377,8 +416,12 @@ namespace Tests.Tests.Inventory
 
             App.Ui.ToolsMain.PerformFiltering(filters);
             App.Ui.ToolsMain.ClickTool(toolToCheck);
-            var columnNames = App.Ui.ToolManagerToolInfo.GetInstacesInStockGridColumnsNames();
-            expectedColumnNames = ServiceMethods.StringListToUpper(expectedColumnNames);
+            var columnNames = App.Ui.ToolManagerToolInfo.GetInstacesGridColumnsNames();
+            if (Parameters.Parameters.Browser != "MicrosoftEdge")
+            {
+                expectedColumnNames = ServiceMethods.StringListToUpper(expectedColumnNames);
+            }
+
             Assert.True(columnNames.SequenceEqual(expectedColumnNames), "Instances in stock table header is wrong");
         }
 
@@ -396,13 +439,12 @@ namespace Tests.Tests.Inventory
         [Property("TestCase", "833")]
         public void CheckToolInstanceGridDataRelevance()
         {
-            var expectedInstanceInStock = new InstanceInStockGridRecord()
+            var expectedInstanceInStock = new ToolInstanceGridRecord()
                                                {
-                                                   Name = "Test",
                                                    Id = 1,
-                                                   Size = 98888888,
-                                                   Length = 99991111,
-                                                   Location = "Magazine 1",
+                                                   Size = 6091000,
+                                                   Length = 118805000,
+                                                   Location = "Preset Machine 2",
                                                    ActualUsageTime = "02:46:40",
                                                    MaximumUsageTime = "05:33:20",
                                                    Status = "Ready"
@@ -420,9 +462,9 @@ namespace Tests.Tests.Inventory
 
             App.Ui.ToolsMain.PerformFiltering(filters);
             App.Ui.ToolsMain.ClickTool(toolToCheck);
-            var instancesInStock = App.Ui.ToolManagerToolInfo.GetInstancesInStock();
+            var instancesInStock = App.Ui.ToolManagerToolInfo.GetToolInstances();
 
-            var instanceToCheck = instancesInStock.First(i => i.Name.Equals(expectedInstanceInStock.Name));
+            var instanceToCheck = instancesInStock.First(i => i.Id.Equals(expectedInstanceInStock.Id));
 
             Assert.True(instanceToCheck.Equals(expectedInstanceInStock), "Instance in stock data is displayed incorrectly on the tool info page");
         }
@@ -435,10 +477,87 @@ namespace Tests.Tests.Inventory
         {
             var record = App.Ui.ToolsMain.GetGridRecords().First(r => r.Quantity == 0);
             App.Ui.ToolsMain.ClickTool(record.Name);
-            var instancesInStock = App.Ui.ToolManagerToolInfo.GetInstancesInStock();
+            var instancesInStock = App.Ui.ToolManagerToolInfo.GetToolInstances();
 
-            Assert.True(instancesInStock.Count==1 && instancesInStock.First().Name.Equals("No instances in stock"), "Empty grid is not displayed correctly");
+            Assert.True(instancesInStock.Count == 0, "Empty grid is not displayed correctly");
+        }
 
+        [Test]
+        [Property("Reference", "TLM-246")]
+        [Property("TestCase", "2280")]
+        [Property("TestCase", "2281")]
+        [Property("TestCase", "2282")]
+        [Property("TestCase", "2283")]
+        [Property("TestCase", "2284")]
+        [Category("UI")]
+        public void Tools_AssembliesInfo_NewAsseblyCreationPage()
+        {
+            #region properties
+            var title = "Create new tool instance";
+            var assemblyIdplaceholder = "Please enter ID or scan";
+            #endregion
+
+            App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Tools);
+            App.Ui.ToolsMain.ClickRandomTool();
+            App.Ui.ToolManagerToolInfo.ClickCreateNewInstanceButton();
+            Assert.That(App.Ui.ToolManagerToolInfo.IsCreateToolPageOpened, "Create tool page is closed");
+            Assert.AreEqual(title, App.Ui.ToolManagerToolInfo.GetTitleOfCreationToolPage, "Incorrect title");
+            Assert.AreEqual(assemblyIdplaceholder, 
+                App.Ui.ToolManagerToolInfo.GetToolCreationFieldPlaceholder(CreateToolInstancePopup.ToolInstanceFileds.AssemblyId),
+                "Incorrect placeholder");
+
+            Assert.IsFalse(App.Ui.ToolManagerToolInfo.IsSaveEnabled, "save btn is enabled");
+
+            App.Ui.ToolManagerToolInfo.CancelCreationOfNewTool();
+            Assert.IsFalse(App.Ui.ToolManagerToolInfo.IsCreateToolPageOpened, "Create tool page is opened, but should be closed");
+
+            App.Ui.ToolManagerToolInfo.ClickCreateNewInstanceButton();
+            App.Ui.ToolManagerToolInfo.CloseCreationOfNewTool();
+            Assert.IsFalse(App.Ui.ToolManagerToolInfo.IsCreateToolPageOpened, "Create tool page is opened, but should be closed");
+        }
+
+        [Test]
+        [Property("Reference", "TLM-246")]
+        [Property("TestCase", "2285")]
+        [Category("UI")]
+        public void Tools_AssembliesInfo_CreateNewAssebly()
+        {
+            #region properties
+            var assemblyId = new Faker().Random.Number(100000).ToString();
+            #endregion
+
+            App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Tools);
+            App.Ui.ToolsMain.ClickPage(2); //to keep preconditions for other tests
+            App.Ui.ToolsMain.ClickRandomTool();
+            var toolInstances = App.Ui.ToolManagerToolInfo.GetToolInstances().Count;
+            App.Ui.ToolManagerToolInfo.ClickCreateNewInstanceButton();
+            App.Ui.ToolManagerToolInfo.CreateToolInstance(assemblyId);
+            Assert.True(App.Ui.ToolManagerToolInfo.GetToolInstances().Count > toolInstances, "Record wasn't added");
+            var toolType = App.Ui.ToolManagerToolInfo.GetToolAssemblyInfo().Name;
+            App.Ui.Main.NavigateToSectionInSideMenu(SidePanelData.Sections.ToolLinking);
+            App.Ui.Link.PopulateFirstItem(assemblyId);
+            Assert.That(App.Ui.Link.GetItemsDescriptions().Contains(toolType), "Creation of tool instence was done oncorrecntly");
+        }
+
+        [Test]
+        [Property("Reference", "TLM-358")]
+        [Property("TestCase", "2881")]
+        [Property("TestCase", "2883")]
+        [Category("UI")]
+        public void ToolsAssembliesInfoDeleteToolAssembly()
+        {
+            #region properties
+            var assemblyId = new Faker().Random.Number(100000).ToString();
+            #endregion
+
+            App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Tools);
+            var tool = App.Ui.ToolsMain.GetGridRecords().First(t => t.Quantity.Equals(0));
+            App.Ui.ToolsMain.ClickTool(tool.Name);
+            App.Ui.ToolManagerToolInfo.ClickCreateNewInstanceButton();
+            App.Ui.ToolManagerToolInfo.CreateToolInstance(assemblyId);
+            var instance = App.Ui.ToolManagerToolInfo.GetToolInstances().Last();
+            App.Ui.ToolManagerToolInfo.DisassembleInstance(instance.Id);
+            Assert.True(App.Ui.ToolManagerToolInfo.GetToolInstances().Count.Equals(0), "Tool instance wasn't disassembled");
         }
 
 
@@ -459,29 +578,27 @@ namespace Tests.Tests.Inventory
         {
             var expectedTool = new ToolAssembly();
             if (expPlateExists)
-            {              
-                expectedTool.Name = "010K117S000F0155";
+            {
+                expectedTool.Name = "000P082K07010000";
                 expectedTool.CutterAssembly = new CutterAssembly();
-                expectedTool.CutterAssembly.Cutter = new List<Cutter>();
-                expectedTool.CutterAssembly.Cutter.Add(
-                    new Cutter { Diameter = 1000000, Name = "KF 01.0 35KON 0.9 HITACHI GL80" });
+                expectedTool.CutterAssembly.Cutter =
+                    new Cutter { Diameter = 114000000, Name = "D 100 PLAN R345 SANDVIK STAHL SL" };
                 expectedTool.CutterAssembly.ExchangablePlate =
-                    new ExchangablePlate() { Name = "D 16 ZYL HITACHI ABPF GL140" };
-                expectedTool.CutterAssembly.Cutter.First().EdgeNr = 2;
-                expectedTool.Length = 149000000;
-                expectedTool.Quantity = 0;
+                    new ExchangablePlate() { Name = "D 100 PLAN R345 SANDVIK STAHL SL" };
+                expectedTool.CutterAssembly.Cutter.EdgeNr = 10; 
+                expectedTool.Length = 110000000;
+                expectedTool.Quantity = 6;
                 expectedTool.Holders = new List<Holder>();
-                expectedTool.Holders.Add(new Holder { Name = "D06 SCHRUMPF DEPO EL68 HSK63" });
-                expectedTool.UsageMaterials = new List<string>(){ "ALU", "STAHL", "WZ.STAHL" };
+                expectedTool.Holders.Add(new Holder { Name = "D32 AUFSTECK KEMMLER EL024 GL060 HSK63" });
+                expectedTool.UsageMaterials = new List<string> { "DMU STAHL", "GG", "STAHL", "WZG-STAHL" };
             }
             else
             {
                 expectedTool.Name = "060K098T000F0650";
                 expectedTool.CutterAssembly = new CutterAssembly();
-                expectedTool.CutterAssembly.Cutter = new List<Cutter>();
-                expectedTool.CutterAssembly.Cutter.Add(
-                    new Cutter { Diameter = 6000000, Name = "KF 06.0 35KON 1.5 POKOLM GL75" });
-                expectedTool.CutterAssembly.Cutter.First().EdgeNr = 1;
+                expectedTool.CutterAssembly.Cutter =
+                    new Cutter { Diameter = 6000000, Name = "KF 06.0 35KON 1.5 POKOLM GL75" };
+                expectedTool.CutterAssembly.Cutter.EdgeNr = 1;
                 expectedTool.Length = 126000000;
                 expectedTool.Quantity = 0;
                 expectedTool.Holders = new List<Holder>();
@@ -501,18 +618,18 @@ namespace Tests.Tests.Inventory
                     {
                         Assert.True(actualTool.Name.Equals(expectedTool.Name), "Name is wrong");
                         Assert.True(
-                            actualTool.CutterAssembly.Cutter.First().Diameter
-                                .Equals(expectedTool.CutterAssembly.Cutter.First().Diameter),
-                            $"Size is wrong. Expected is {expectedTool.CutterAssembly.Cutter.First().Diameter} but actual is { actualTool.CutterAssembly.Cutter.First().Diameter}");
+                            actualTool.CutterAssembly.Cutter.Diameter
+                                .Equals(expectedTool.CutterAssembly.Cutter.Diameter),
+                            $"Size is wrong. Expected is {expectedTool.CutterAssembly.Cutter.Diameter} but actual is { actualTool.CutterAssembly.Cutter.Diameter}");
                         Assert.True(
-                            ServiceMethods.RemoveMultipleInnerWhitespaces(actualTool.CutterAssembly.Cutter.First().Name)
-                                .Equals(expectedTool.CutterAssembly.Cutter.First().Name),
-                            $"Cutter component name is wrong. Expected '{expectedTool.CutterAssembly.Cutter.First().Name}'");
+                            ServiceMethods.RemoveMultipleInnerWhitespaces(actualTool.CutterAssembly.Cutter.Name)
+                                .Equals(ServiceMethods.RemoveMultipleInnerWhitespaces(expectedTool.CutterAssembly.Cutter.Name)),
+                            $"Cutter component name is wrong. Expected '{expectedTool.CutterAssembly.Cutter.Name}'");
                         if (expectedTool.CutterAssembly.ExchangablePlate != null)
                         {
                             Assert.True(
-                                actualTool.CutterAssembly.ExchangablePlate != null && ServiceMethods.RemoveMultipleInnerWhitespaces(actualTool.CutterAssembly.ExchangablePlate.Name)
-                                    .Equals(expectedTool.CutterAssembly.ExchangablePlate.Name),
+                               actualTool.CutterAssembly.ExchangablePlate != null && ServiceMethods.RemoveMultipleInnerWhitespaces(actualTool.CutterAssembly.ExchangablePlate.Name)
+                                    .Equals(ServiceMethods.RemoveMultipleInnerWhitespaces(expectedTool.CutterAssembly.ExchangablePlate.Name)),
                                 $"Exchangable plate is wrong. Expected '{expectedTool.CutterAssembly.ExchangablePlate.Name}'");
                         }
                         else
@@ -521,13 +638,13 @@ namespace Tests.Tests.Inventory
                         }
 
                         Assert.True(actualTool.Length.Equals(expectedTool.Length), "Length is wrong");
-                        Assert.True(actualTool.Quantity.Equals(expectedTool.Quantity), "Quantity is wrong");
+                        Assert.True(actualTool.Quantity >= expectedTool.Quantity, "Quantity is wrong");
                         Assert.True(
                             ServiceMethods.RemoveMultipleInnerWhitespaces(actualTool.Holders.First().Name)
-                                .Equals(expectedTool.Holders.First().Name),
+                                .Equals(ServiceMethods.RemoveMultipleInnerWhitespaces(expectedTool.Holders.First().Name)),
                             "Holder name is wrong");
 
-                        Assert.True(actualTool.CutterAssembly.Cutter.First().EdgeNr.Equals(actualTool.CutterAssembly.Cutter.First().EdgeNr), "Cutters quantity is incorrect");
+                        Assert.True(actualTool.CutterAssembly.Cutter.EdgeNr.Equals(actualTool.CutterAssembly.Cutter.EdgeNr), "Cutters quantity is incorrect");
                         Assert.True(actualTool.UsageMaterials.SequenceEqual(expectedTool.UsageMaterials), "Usage materials are wrong");
                     });
         }
@@ -539,9 +656,9 @@ namespace Tests.Tests.Inventory
                 {
                     Assert.True(actualTool.Name.Equals(expectedTool.Name), "Name is wrong");
                     Assert.True(
-                        actualTool.Cutter.First().Diameter
-                            .Equals(expectedTool.Cutter.First().Diameter),
-                        $"Size is wrong. Expected {expectedTool.Cutter.First().Diameter} but actual {actualTool.Cutter.First().Diameter}");
+                        actualTool.Cutter.Diameter
+                            .Equals(expectedTool.Cutter.Diameter),
+                        $"Size is wrong. Expected {expectedTool.Cutter.Diameter} but actual {actualTool.Cutter.Diameter}");
                    
                     Assert.True(actualTool.Length.Equals(expectedTool.Length), "Length is wrong");
                     Assert.True(actualTool.Quantity.Equals(expectedTool.Quantity), "Quantity is wrong");

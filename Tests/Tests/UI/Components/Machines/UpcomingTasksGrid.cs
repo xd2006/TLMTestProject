@@ -3,6 +3,7 @@ namespace Tests.UI.Components.Machines
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
 
     using AngleSharp.Dom;
     using AngleSharp.Parser.Html;
@@ -19,14 +20,28 @@ namespace Tests.UI.Components.Machines
         {
         }
 
-        public List<TaskAllocationRecord> GetRecords()
-        {          
-            List<TaskAllocationRecord> tasks = new List<TaskAllocationRecord>();
+        public List<TaskAllocationRecord> GetRecords(bool shouldFind, int timeoutSec)
+        {
+            int rowsNumber = 0;
+            int counter = 0;
+            IHtmlCollection<IElement> rows;
+            do
+            {
+                rows = this.GetGridRows();
+                rowsNumber = rows.Length;
+                if (counter > 0 && rows.Length <= 1)
+                {
+                    Thread.Sleep(1000);
+                }
 
-            var rows = this.GetGridRows();
+            }
+            while (shouldFind && rowsNumber <= 1 && counter++ < timeoutSec);
 
             var gridCellCssSelector = "td";
-            bool currentTaskRow = true; // to skip current task row
+                bool currentTaskRow = true; // to skip current task row
+            
+
+            var tasks = new List<TaskAllocationRecord>(); 
             foreach (var row in rows)
             {
                 if (currentTaskRow)
@@ -39,8 +54,8 @@ namespace Tests.UI.Components.Machines
                 var cells = row.QuerySelectorAll(gridCellCssSelector);
 
                 var cellsTexts = cells.Select(t => t.TextContent).ToList();
-                task.UpcomingTask = cellsTexts[0];
-                task.Workpiece = cellsTexts[1];
+                task.UpcomingWorkpiece = cellsTexts[0];
+                task.WorkpieceName = cellsTexts[1];
                 task.ActualStart = cellsTexts[2];
                 task.EstimatedDuration = cellsTexts[3];
                 task.EstimatedEnd = cellsTexts[4];
@@ -49,6 +64,11 @@ namespace Tests.UI.Components.Machines
             }
             
             return tasks;
-        }     
+        }
+
+        public List<TaskAllocationRecord> GetRecords()
+        {
+            return this.GetRecords(false, 1);
+        }
     }
 }

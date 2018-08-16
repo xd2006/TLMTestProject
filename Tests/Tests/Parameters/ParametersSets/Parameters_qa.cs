@@ -10,7 +10,7 @@ namespace Tests.Parameters.ParametersSets
 
         public override string ApplicationUrl => "http://draftqa.westeurope.cloudapp.azure.com/";
 
-        public override string ToolManagerUrl => ApplicationUrl + "inventory";
+        public override string ToolManagerUrl => ApplicationUrl + "tools";
 
         public override string ProjectManagerUrl => ApplicationUrl + "orders";
 
@@ -22,12 +22,12 @@ namespace Tests.Parameters.ParametersSets
         public override string ProjectManagerGraphQlEndpoint => "http://draftqa.westeurope.cloudapp.azure.com:5050/graphql";
 
         public override string ProjectManagerDbConnectionString =>
-            @"User ID=tlm;Password=tlm;Host=52.232.113.1;Port=5432;Database=ProjectManager;
+            @"User ID=TLM;Password=TLM;Host=52.232.113.1;Port=5432;Database=ProjectManager;
         Pooling=true;";  //Update with QA server IP
 
         public override string HubUrl => null;
 
-        //        public override string HubUrl => "http://localhost:4444/wd/hub"
+//        public override string HubUrl => "http://137.117.211.24:4444/wd/hub";
 
         public override string TestRailUrl => null;
 

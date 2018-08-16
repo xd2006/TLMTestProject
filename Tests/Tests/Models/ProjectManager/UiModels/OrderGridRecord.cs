@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Tests.Models.ProjectManager.UiModels
 {
-    using Core.Service;
-
     public class OrderGridRecord
     {
         public string OrderId { get; set; }

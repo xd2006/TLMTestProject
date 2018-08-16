@@ -40,11 +40,13 @@ namespace Tests.Parameters
 
         private string testRailRunId;
 
+        private string environment;
+
         private Parameters()
         {
             var appSettings = ConfigurationManager.AppSettings;
 
-            var environment = System.Environment.GetEnvironmentVariable("ENVIRONMENT")
+            environment = System.Environment.GetEnvironmentVariable("ENVIRONMENT")
                               ?? NunitMethods.GetParameter(
                                   "Environment",
                                   appSettings["Environment"]);
@@ -55,6 +57,7 @@ namespace Tests.Parameters
             testRailMilestone = appSettings["Milestone"] != string.Empty ? appSettings["Milestone"] : "Sprint 1";
 
             var currentParam = ParametersFactory.CreateParameters(environment);
+
 
             applicationUrl = currentParam.ApplicationUrl;
             toolManagerUrl = currentParam.ToolManagerUrl;
@@ -102,6 +105,7 @@ namespace Tests.Parameters
 
         public static string LinkAppGraphQlEndpoint => ParametersInstance.linkAppGraphQlEndpoint;
 
+        public static string Environment => ParametersInstance.environment;
 
         public static string TestRailRunId
         {

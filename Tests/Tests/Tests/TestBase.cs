@@ -20,7 +20,14 @@ namespace Tests.Tests
         [SetUp]
         public void BeforeTest()
         {
-            var dir = TestContext.CurrentContext.TestDirectory;
+            if (Parameters.Parameters.Browser == "MicrosoftEdge"
+                && TestContext.CurrentContext.Test.Properties["Category"].Contains("NoEdge"))
+            {                
+                App.Logger.Info("Test is ignored due to MS Edge restrictions - " + TestContext.CurrentContext.Test.MethodName);
+                Assert.Ignore();
+            }
+            
+                    var dir = TestContext.CurrentContext.TestDirectory;
                 Environment.CurrentDirectory = dir;
             this.App.Logger.Info("Test started - " + TestContext.CurrentContext.Test.MethodName);
         }
@@ -28,6 +35,22 @@ namespace Tests.Tests
         [TearDown]
         public void AfterTest()
         {
+            if (TestContext.CurrentContext.Test.Properties["Category"].Contains("UI")
+                && !TestContext.CurrentContext.Test.Properties["Category"].Contains("ConsoleErrorExpected")
+                && Parameters.Parameters.Browser.ToLower() != "microsoftedge")
+            {
+                var errors = App.Ui.UiHelp.GetBrowserLogs();
+                if (errors.Count > 0)
+                {
+                    App.Logger.Error($"Browser console errors were found during test method run: {TestContext.CurrentContext.Test.MethodName}. Errors:" + Environment.NewLine);
+                    foreach (var er in errors)
+                    {
+                        App.Logger.Error(er.Level + " " + er.Message);
+                    }
+                }
+            }
+
+
             APIClient testRailClient = null;
 
             if (!string.IsNullOrEmpty(Parameters.Parameters.TestRailUrl))
@@ -52,9 +75,12 @@ namespace Tests.Tests
               }
             else
             {
-                this.App.Logger.Info("Test completed successfully - " + TestContext.CurrentContext.Test.MethodName);
+                if (TestContext.CurrentContext.Result.Outcome.Status != TestStatus.Skipped)
+                {
+                    this.App.Logger.Info("Test completed successfully - " + TestContext.CurrentContext.Test.MethodName);
 
-                this.ProcessPassedCaseWithTestRail(testCaseNumbers, testRailClient);
+                    this.ProcessPassedCaseWithTestRail(testCaseNumbers, testRailClient);
+                }
             }
 
             if (this.App.PageManagerExists)
@@ -89,7 +115,7 @@ namespace Tests.Tests
                         catch (Exception e)
                         {
                             // supress exception
-                            this.App.Logger.Warn("Can't update test cases state on TestRail:");
+                            this.App.Logger.Warn($"Can't update test case '{testCase}' state on TestRail:");
                             this.App.Logger.Warn(e.Message);
                         }
                     }
@@ -132,7 +158,7 @@ namespace Tests.Tests
                         catch (Exception e)
                         {
                             // supress exception
-                            this.App.Logger.Warn("Can't update test cases state on TestRail:");
+                            this.App.Logger.Warn($"Can't update test cases '{testCase}' state on TestRail:");
                             this.App.Logger.Warn(e.Message);
                         }
                     }

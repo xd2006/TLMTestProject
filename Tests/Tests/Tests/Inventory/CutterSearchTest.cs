@@ -1,4 +1,8 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+using Core.Service;
+
 namespace Tests.Tests.Inventory
 {
     using System.Collections;
@@ -8,6 +12,9 @@ namespace Tests.Tests.Inventory
 
     using NUnit.Framework;
 
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    [Category("Search")]
     public class CutterSearchTest : InventoryTestsTemplate
     {
         [Test, TestCaseSource(typeof(SearchDataSource), nameof(SearchDataSource.SearchTestCasesPositive))]
@@ -44,6 +51,22 @@ namespace Tests.Tests.Inventory
             Assert.That(uiRsults.Count == 0, "Ui shouldn't return any data");
         }
 
+        [Test]
+        [Category("UI")]
+        [Property("Reference", "TLM-70")]
+        [Property("TestCase", "158")]
+        public void CuttersContentOfTheGrid()
+        {
+            var expectedColumns = new List<string> { "NAME", "SIZE", "LENGTH", "QUANTITY" };
+
+            this.App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Cutters);
+            var columnNames = this.App.Ui.ToolsMain.GetGridColumnsNames();
+            columnNames = ServiceMethods.RemoveStringsInList(columnNames, new List<string> { "▲", "▼" });
+
+            var columnNamesToUpper = new List<string>();
+            columnNames.ForEach(e => columnNamesToUpper.Add(e.ToUpper()));
+            Assert.That(columnNamesToUpper.SequenceEqual(expectedColumns), "Grid columns names are not as expected");
+        }
 
         private class SearchDataSource
         {

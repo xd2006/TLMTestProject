@@ -4,6 +4,7 @@ namespace Tests.Tests.Inventory
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
 
     using global::Tests.Tests.Inventory.Templates;
     using global::Tests.TestsData.Inventory.Enums.FilterSearch;
@@ -18,7 +19,6 @@ namespace Tests.Tests.Inventory
         [Test]
         [Category("UI")]
         [Property("TestCase", "386")]
-        [Property("Bug", "TLM-348")]
         [Property("Reference", "TLM-71")]
         public void RemainingSortingAfterChangeFilters()
         {
@@ -73,7 +73,7 @@ namespace Tests.Tests.Inventory
 
 
             this.App.Ui.ToolsMain.PerformFiltering(filters);
-            this.App.Ui.ToolsMain.ResetSearchAndFilters();
+            this.App.Ui.ToolsMain.ResetFilters();
 
             var names = this.GetDefinedIntResults(columnName);
             var currentSorting = this.App.Ui.ToolsMain.GetCurrentSorting();
@@ -139,7 +139,9 @@ namespace Tests.Tests.Inventory
             this.App.Ui.ToolsMain.ClickColumnName(columnName);
             var sorting = this.App.Ui.ToolsMain.GetCurrentSorting();
 
-            Assert.That(sorting.Key.Equals(columnName.ToString()) && sorting.Value.Equals("ASC"), $"Sorting is incorrect. Should be ASC by '{columnName}'");
+            Assert.That(
+                sorting.Key.Equals(columnName.ToString()) && sorting.Value.Equals("ASC"),
+                $"Sorting is incorrect. Should be ASC by '{columnName}'");
 
             var names = this.GetDefinedIntResults(columnName);
 
@@ -158,11 +160,33 @@ namespace Tests.Tests.Inventory
 
             names = this.GetDefinedIntResults(columnName);
 
-            this.App.Ui.ToolsMain.ClickRandomPage();
+
+            this.App.Ui.ToolsMain.ClickPage(2);
+
+            #region remove zeroes
 
             names.AddRange(this.GetDefinedIntResults(columnName));
-         
-           Assert.That(names.SequenceEqual(names.OrderByDescending(n => n).ToList()), "Order is wrong");            
+            int numberOfZero = 0;
+            if (names.Contains(0))
+            {
+                foreach (var n in names)
+                {
+                    if (n == 0)
+                    {
+                        numberOfZero++;
+                    }
+                }
+            
+
+                for (int i = 0; i < numberOfZero; i++)
+                {
+                    names.Remove(0);
+                }
+            }
+
+        #endregion
+
+            Assert.That(names.SequenceEqual(names.OrderByDescending(n => n).ToList()), "Order is wrong");            
         }
 
         //ToolAssembly model is used for all Tool types since there is no difference on UI
@@ -236,7 +260,7 @@ namespace Tests.Tests.Inventory
                 case FilterSearchData.GridColumnsNames.SIZE:
                     {
                         return this.App.Ui.ToolsMain.GetAssembliesResults()
-                            .Select(r => r.CutterAssembly.Cutter.First().Diameter).ToList();
+                            .Select(r => r.CutterAssembly.Cutter.Diameter).ToList();
                     }
                 default:
                     {
@@ -259,15 +283,15 @@ namespace Tests.Tests.Inventory
             {
                 yield return new TestCaseData(
                     FilterSearchData.GridColumnsNames.SIZE,
-                    FilterSearchData.ToolsTypes.Assemblies,
+                    FilterSearchData.ToolsTypes.Tools,
                     "000").SetProperty("TestCase", "127");
                 yield return new TestCaseData(
                     FilterSearchData.GridColumnsNames.LENGTH,
-                    FilterSearchData.ToolsTypes.Assemblies,
-                    "000").SetProperty("TestCase", "128").SetProperty("Bug", "TLM-348");
+                    FilterSearchData.ToolsTypes.Tools,
+                    "000").SetProperty("TestCase", "128");
                 yield return new TestCaseData(
                     FilterSearchData.GridColumnsNames.QUANTITY,
-                    FilterSearchData.ToolsTypes.Assemblies,
+                    FilterSearchData.ToolsTypes.Tools,
                     "000").SetProperty("TestCase", "385");
 
                 yield return new TestCaseData(
@@ -277,7 +301,7 @@ namespace Tests.Tests.Inventory
                 yield return new TestCaseData(
                     FilterSearchData.GridColumnsNames.LENGTH,
                     FilterSearchData.ToolsTypes.Cutters,
-                    "00").SetProperty("TestCase", "192").SetProperty("Bug", "TLM-348");
+                    "00").SetProperty("TestCase", "192");
                 yield return new TestCaseData(
                     FilterSearchData.GridColumnsNames.QUANTITY,
                     FilterSearchData.ToolsTypes.Cutters,
@@ -286,7 +310,7 @@ namespace Tests.Tests.Inventory
                 yield return new TestCaseData(
                     FilterSearchData.GridColumnsNames.LENGTH,
                     FilterSearchData.ToolsTypes.Holders,
-                    "EL").SetProperty("TestCase", "196").SetProperty("Bug", "TLM-348");
+                    "EL").SetProperty("TestCase", "196");
                 yield return new TestCaseData(
                     FilterSearchData.GridColumnsNames.QUANTITY,
                     FilterSearchData.ToolsTypes.Holders,
@@ -299,7 +323,7 @@ namespace Tests.Tests.Inventory
             get
             {
                 yield return new TestCaseData(
-                    FilterSearchData.ToolsTypes.Assemblies,
+                    FilterSearchData.ToolsTypes.Tools,
                     "000").SetProperty("TestCase", "126");
                 yield return new TestCaseData(
                     FilterSearchData.ToolsTypes.Cutters,
@@ -315,10 +339,10 @@ namespace Tests.Tests.Inventory
             get
             {
                 yield return new TestCaseData(
-                    FilterSearchData.ToolsTypes.Assemblies,
+                    FilterSearchData.ToolsTypes.Tools,
                     null).SetProperty("TestCase", "391");
                 yield return new TestCaseData(
-                    FilterSearchData.ToolsTypes.Assemblies,
+                    FilterSearchData.ToolsTypes.Tools,
                     "000").SetProperty("TestCase", "125");
                 yield return new TestCaseData(
                     FilterSearchData.ToolsTypes.Cutters,

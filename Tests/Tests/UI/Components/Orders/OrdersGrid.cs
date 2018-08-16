@@ -3,11 +3,14 @@ namespace Tests.UI.Components.Orders
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
 
+    using AngleSharp.Css.Values;
     using AngleSharp.Parser.Html;
 
     using Core.Service;
     using Core.WeDriverService;
+    using Core.WeDriverService.Extensions;
 
     using global::Tests.Models.ProjectManager.UiModels;
     using global::Tests.UI.Components.Interfaces;
@@ -67,7 +70,9 @@ namespace Tests.UI.Components.Orders
         public new void ClickRecord(string orderId)
         {
             By recordNameLocator = By.CssSelector("table tr > td:nth-of-type(1)");
-            this.Driver.Finds(recordNameLocator).Where(t => t.Text.Equals(orderId)).ToList().First().Click();
+
+            Driver.Click(
+                () => this.Driver.Finds(recordNameLocator).Where(t => t.Text.Equals(orderId)).ToList().First());
         }
     }
 }

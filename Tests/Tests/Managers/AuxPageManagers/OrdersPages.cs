@@ -18,7 +18,11 @@ namespace Tests.Managers.AuxPageManagers
 
         private OrdersWorkpieceDetailsPage ordersWorkpieceDetailsPage;
 
+        private OrdersWorkpieceTaskRequiredToolsPage ordersWorkpieceTaskRequiredToolsPage;
 
+        private OrdersCreateTaskPopup ordersCreateTaskPopup;
+
+        private OrdersCreateWorkpiecePopup ordersCreateWorkpiecePopup;
 
         public OrdersPages(IWebDriver driver)
             : base(driver)
@@ -39,6 +43,16 @@ namespace Tests.Managers.AuxPageManagers
             this.ordersWorkpieceDetailsPage
             ?? (this.ordersWorkpieceDetailsPage = new OrdersWorkpieceDetailsPage(this.Driver));
 
-       
+        public OrdersWorkpieceTaskRequiredToolsPage TaskRequiredToolsPage => 
+             this.ordersWorkpieceTaskRequiredToolsPage ??
+            (this.ordersWorkpieceTaskRequiredToolsPage = new OrdersWorkpieceTaskRequiredToolsPage(Driver));
+
+        public OrdersCreateTaskPopup CreateTaskPopup =>
+            this.ordersCreateTaskPopup ??
+            (this.ordersCreateTaskPopup = new OrdersCreateTaskPopup(Driver));
+        
+        public OrdersCreateWorkpiecePopup CreateWorkpiecePopup =>
+            this.ordersCreateWorkpiecePopup ??
+            (this.ordersCreateWorkpiecePopup = new OrdersCreateWorkpiecePopup(Driver));        
     }
 }

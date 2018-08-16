@@ -10,7 +10,7 @@ namespace Tests.Parameters.ParametersSets
 
         public override string ApplicationUrl => "http://tlm-autotest.westeurope.cloudapp.azure.com/";
 
-        public override string ToolManagerUrl => ApplicationUrl + "inventory";
+        public override string ToolManagerUrl => ApplicationUrl + "tools";
 
         public override string ProjectManagerUrl => ApplicationUrl + "orders";
 

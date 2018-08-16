@@ -35,7 +35,7 @@ namespace Tests.Helpers.GraphApi.ProjectManager
             return result.Data["createOrder"]["id"];
         }
 
-        public List<Order> GetOrders(int take = 1000)
+        public List<Order> GetOrders(int take = 10000)
         {
             GetEntitiesRequest request = ProjectManagerRequests.Order.GetOrders;
 

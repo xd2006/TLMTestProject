@@ -24,7 +24,7 @@ namespace Core.WeDriverService.Extensions
         /// <param name="timeoutSeconds">
         /// The timeout Seconds.
         /// </param>
-        public static void WaitForPageReady(this IWebDriver driver, int timeoutSeconds = 30)
+        public static void WaitForPageReady(this IWebDriver driver, int timeoutSeconds = 50)
         {
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds));
 
@@ -64,21 +64,29 @@ namespace Core.WeDriverService.Extensions
                 return false;
             }           
         }
-
-        public static void WaitForElement(this IWebDriver driver, By locator, int timeoutSeconds = 30)
+        
+        public static IWebElement WaitForElement(this IWebDriver driver, By locator, int timeoutSeconds = 30)
         {
-           ExecuteWithoutImplicitTimeout(
+            return ExecuteWithoutImplicitTimeout(
                 driver,
-                () => new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutSeconds)).Until(
-                    ExpectedConditions.ElementIsVisible(locator)));           
+                webDriver => new WebDriverWait(webDriver, TimeSpan.FromSeconds(timeoutSeconds)).Until(
+                    ExpectedConditions.ElementExists(locator)));
         }
 
-        public static IWebElement WaitForElementAndReturn(this IWebDriver driver, By locator, int timeoutSeconds = 30)
+        public static IWebElement WaitForElementVisible(this IWebDriver driver, By locator, int timeoutSeconds = 30)
         {
             return ExecuteWithoutImplicitTimeout(
                 driver,
                 webDriver => new WebDriverWait(webDriver, TimeSpan.FromSeconds(timeoutSeconds)).Until(
                     ExpectedConditions.ElementIsVisible(locator)));
+        }
+
+        public static IWebElement WaitForElementToBeClickable(this IWebDriver driver, By locator, int timeoutSeconds = 30)
+        {
+            return ExecuteWithoutImplicitTimeout(
+                driver,
+                webDriver => new WebDriverWait(webDriver, TimeSpan.FromSeconds(timeoutSeconds)).Until(
+                    ExpectedConditions.ElementToBeClickable(locator)));
         }
 
         public static bool WaitForElementBool(this IWebDriver driver, By locator, int timeoutSeconds = 30)
@@ -210,16 +218,35 @@ namespace Core.WeDriverService.Extensions
                 return null;
             }
 
-            try
+            StaleElementReferenceException exc = null;
+            int counter = 0;
+
+            do
             {
-                driver.DisableTimeout();
-                var el = action(driver);
-                return el;
+                try
+                {
+                    driver.DisableTimeout();
+                    var el = action(driver);
+                    return el;
+                }
+                catch (StaleElementReferenceException e)
+                {
+                    exc = e;
+                    Thread.Sleep(500);
+                }
+                finally
+                {
+                    driver.SetTimeout();
+                }
             }
-            finally
+            while (exc != null && counter++ < 10);
+
+            if (counter >= 10 && exc!=null)
             {
-                driver.SetTimeout();
+                throw exc;
             }
+
+            return null;
         }
 
         private static List<IWebElement> ExecuteWithoutImplicitTimeout(IWebDriver driver, Func<IWebDriver, List<IWebElement>> action)

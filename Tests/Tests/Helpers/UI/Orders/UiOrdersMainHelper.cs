@@ -5,7 +5,9 @@ namespace Tests.Helpers.UI.Orders
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Threading;
 
+    using Core.Service;
     using Core.WeDriverService.Extensions;
 
     using global::Tests.Managers;
@@ -27,9 +29,24 @@ namespace Tests.Helpers.UI.Orders
             return this.App.Pages.OrdersPages.MainPage.GetOrdersGridColumnsNames();          
         }
 
-        public List<OrderGridRecord> GetOrderGridRecords()
+        public List<OrderGridRecord> GetOrderGridRecords(bool shouldNotBeEmpty = true, int waitSec = 20)
         {
-            return this.App.Pages.OrdersPages.MainPage.GetGridRecords();
+            var records = this.App.Pages.OrdersPages.MainPage.GetGridRecords();
+            if (shouldNotBeEmpty && records.Count == 0)
+            {
+                int counter = 0;
+                do
+                {
+                    records = this.App.Pages.OrdersPages.MainPage.GetGridRecords();
+                    if (counter > 0 && records.Count == 0)
+                    {
+                        Thread.Sleep(1000);
+                    }
+                }
+                while (records.Count == 0 && counter++ < waitSec);
+            }
+
+            return records;
         }
 
         public void ClickNextButton()
@@ -59,7 +76,7 @@ namespace Tests.Helpers.UI.Orders
             }
 
             return int.Parse(page);
-        }
+        }       
 
         public int GetActivePage()
         {
@@ -94,28 +111,34 @@ namespace Tests.Helpers.UI.Orders
         {
             this.App.Pages.OrdersPages.MainPage.ClickCreateNewOrderButton();
             this.App.Pages.OrdersPages.CreateOrderPopup.WaitForPageLoad();
-
         }
 
         public Order FindOrder(string orderId, bool tryLastPageFirstly = false)
         {
             Order foundOrder = null;
-
+            App.Pages.OrdersPages.MainPage.WaitForPageLoad();
+            bool isNextButtonActive;
             if (tryLastPageFirstly)
-            {
-                var pages = App.Pages.OrdersPages.MainPage.GetAvailablePages();
-                App.Pages.OrdersPages.MainPage.ClickPage(pages.Last());
+            {                
+                do
+                {
+                    var pagesList = App.Pages.OrdersPages.MainPage.GetAvailablePages();
+                    this.UpdateGridSlow(() => App.Pages.OrdersPages.MainPage.ClickPage(pagesList.Last()));
+                    isNextButtonActive = this.App.Pages.OrdersPages.MainPage.IsNextButtonActive();
+                }
+                while (isNextButtonActive);
+
                 var orderRecord = this.App.Pages.OrdersPages.MainPage.GetGridRecords()
                     .FirstOrDefault(r => r.OrderId.Equals(orderId));
                 if (orderRecord != null)
                 {
                     foundOrder = this.ConvertGridOrderRecordToOrder(orderRecord);
                     return foundOrder;
-                }              
-                    App.Pages.OrdersPages.MainPage.ClickPage(pages.First());              
+                }
+                var pages = App.Pages.OrdersPages.MainPage.GetAvailablePages();
+                App.Pages.OrdersPages.MainPage.ClickPage(pages.First());              
             }
            
-            bool isNextButtonActive;
             do
             {
                 isNextButtonActive = this.App.Pages.OrdersPages.MainPage.IsNextButtonActive();
@@ -136,9 +159,9 @@ namespace Tests.Helpers.UI.Orders
                 return foundOrder;
         }
 
-        public void ClickOrder(string orderId)
+        public void ClickOrder(string orderId, bool checkLastPageFirstly = false)
         {
-           this.FindOrder(orderId);
+           this.FindOrder(orderId, checkLastPageFirstly);
            this.App.Pages.OrdersPages.MainPage.ClickOrder(orderId);
            this.App.Pages.OrdersPages.OrderDetails.WaitForPageLoad();
 
@@ -146,8 +169,8 @@ namespace Tests.Helpers.UI.Orders
 
         public void OpenOrderDetailsDirectly(string externalOrderId)
         {
-//            externalOrderId = externalOrderId.Replace("'", "\'");
-            Sql query = new Sql($"where \"ExternalOrderId\" = \"{externalOrderId}\"");
+            externalOrderId = externalOrderId.Replace("'", "''");
+            Sql query = new Sql($"where \"ExternalOrderId\" = '{externalOrderId}'");
             App.Logger.Info($"Trying to get order by query = {query}");
             var order = this.App.Db.ProjectManager.GetOrders(query).First();
             this.OpenOrderDetailsDirectly(order.Id);
@@ -156,6 +179,7 @@ namespace Tests.Helpers.UI.Orders
         public void OpenOrderDetailsDirectly(int orderId)
         {
             this.App.Ui.UiHelp.NavigateToUrlRelatively($"orders/{orderId}");
+            App.Pages.OrdersPages.OrderDetails.WaitForPageLoad();
         }
 
         public void OpenWorkpieceDetailsDirectly(int workpieceId)
@@ -168,7 +192,6 @@ namespace Tests.Helpers.UI.Orders
         {
             return App.Pages.OrdersPages.MainPage.Opened();
         }
-
         #region private methods
         private void UpdateGrid(Action action, int timeoutSeconds = 10)
         {
@@ -181,6 +204,24 @@ namespace Tests.Helpers.UI.Orders
                 {
                     this.App.Logger.Warn("Grid data possibly wasn't updated");
                 }
+            }
+        }
+
+        private void UpdateGridSlow(Action action, int timeoutSeconds = 10)
+        {
+            var elements = this.App.Pages.OrdersPages.MainPage.GetGridRecords().Select(t => t.OrderId).ToList();
+            action.Invoke();
+
+            int c = 0;
+            while (this.App.Pages.OrdersPages.MainPage.GetGridRecords().Select(t => t.OrderId).ToList()
+                       .SequenceEqual(elements) && c++ < timeoutSeconds)
+            {
+                Thread.Sleep(1000);
+            }
+
+            if (c >= 10)
+            {
+                this.App.Logger.Warn("Grid data possibly wasn't updated");
             }
         }
 

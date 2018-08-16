@@ -12,5 +12,11 @@ namespace Tests.TestsData.Orders.Enums
             End,
             Machine
         }
+
+        public enum WorkpieceDetailsTabs
+        {
+            General,
+            AttachedFiles 
+        }
     }
 }

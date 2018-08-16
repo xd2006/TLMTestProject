@@ -6,12 +6,17 @@
     using System.Threading;
 
     using Core.Service;
+    using Core.WeDriverService.Extensions;
 
     using global::Tests.Managers;
     using global::Tests.Models.ProjectManager.DbModels.Postgres;
     using global::Tests.Models.ProjectManager.UiModels;
     using global::Tests.TestsData.Orders;
     using global::Tests.TestsData.Orders.Enums;
+
+    using NUnit.Framework.Constraints;
+
+    using OpenQA.Selenium;
 
     public class UiOrdersOrderHelper : UiCommonHelper
     {
@@ -25,7 +30,7 @@
             this.App.Pages.OrdersPages.CreateOrderPopup.PopulateField(field, value);
         }
 
-        public void PopulateOrderData(Order order)
+        public void PopulateOrderData(Order order, bool populateOnly = false)
         {
             this.PopulateField(
                 CreateOrderPopup.OrderFields.Customer,
@@ -34,43 +39,49 @@
 
             string deliveryDate = order.DeliveryDate.ToString("yyyy-MM-dd").Equals("0001-01-01")
                                       ? string.Empty
-                                      : order.DeliveryDate.ToString("yyyy-MM-dd");        
+                                      : order.DeliveryDate.ToString("MM/dd/yyyy");        
              this.PopulateField(
                     CreateOrderPopup.OrderFields.OrderDeliveryDate,
                     deliveryDate);
             
 
             this.PopulateField(CreateOrderPopup.OrderFields.Comments, order.Comments);
-        }
 
-        public void AddFilesForWorkpiece(string workpieceId, List<string> files)
-        {
-            if (files != null && files.Count > 0)
+            App.Pages.Driver.WaitForPageReady();            
+            if (!populateOnly)
             {
-                foreach (var file in files)
-                {
-                    App.Pages.OrdersPages.CreateOrderPopup.AddFileForWorkpice(workpieceId, file);
-                }
+                App.Pages.OrdersPages.CreateOrderPopup.ClickSaveButton();
             }
         }
-       
+        
 
         public void AddWorkpieceToOrder(Workpiece workpiece, bool populateOnly = false)
         {
-            this.PopulateField(CreateOrderPopup.OrderFields.WorkpieceId, workpiece.ExternalWorkpieceId);
-            this.PopulateField(CreateOrderPopup.OrderFields.WorkpieceName, workpiece.Name);
-            this.PopulateField(CreateOrderPopup.OrderFields.WorkpieceQuantity, workpiece.Quantity.ToString());
+            var materials = App.GraphApi.ToolManager.GetUsageMaterials();
+            var material = materials.First(m => int.Parse(m.Id).Equals(workpiece.RawMaterialId));
 
+            if (!App.Pages.OrdersPages.CreateWorkpiecePopup.IsOpened())
+            {
+                App.Pages.OrdersPages.OrderDetails.ClickCreateNewWorkpieceButton();
+            }
+
+            App.Pages.OrdersPages.CreateWorkpiecePopup.PopulateField(CreateWorkpiecePopup.WorkpieceFields.WorkpieceId, workpiece.ExternalWorkpieceId);
+            App.Pages.OrdersPages.CreateWorkpiecePopup.PopulateField(CreateWorkpiecePopup.WorkpieceFields.WorkpieceName, workpiece.Name);
             string deliveryDate = workpiece.DeliveryDate.ToString("yyyy-MM-dd").Equals("0001-01-01")
                                       ? string.Empty
-                                      : workpiece.DeliveryDate.ToString("yyyy-MM-dd");
-            this.PopulateField(CreateOrderPopup.OrderFields.WorkpieceDeliveryDate, deliveryDate);
-          
+                                      : workpiece.DeliveryDate.ToString("MM/dd/yyy");
+            App.Pages.OrdersPages.CreateWorkpiecePopup.PopulateField(CreateWorkpiecePopup.WorkpieceFields.WorkpieceDeliveryDate, deliveryDate);
+            App.Pages.OrdersPages.CreateWorkpiecePopup.PopulateField(
+                CreateWorkpiecePopup.WorkpieceFields.WorkpieceMaterial,
+                material.Name);
+            App.Pages.OrdersPages.CreateWorkpiecePopup.PopulateField(CreateWorkpiecePopup.WorkpieceFields.WorkpieceQuantity, workpiece.Quantity.ToString());
+
+
 
             if (!populateOnly)
             {
                 int counter = 0;
-                while (!App.Pages.OrdersPages.CreateOrderPopup.IsAddWorkpieceButtonEnabled() && counter++ < 5)
+                while (!App.Pages.OrdersPages.CreateWorkpiecePopup.IsSaveButtonEnabled() && counter++ < 5)
                 {
                     Thread.Sleep(500);
                 }
@@ -80,13 +91,14 @@
                     throw new Exception("'Add workpiece' button is disabled");
                 }
 
-                this.ClickAddWorkpieceButton();
+                App.Pages.OrdersPages.CreateWorkpiecePopup.ClickSaveButton();
+                ServiceMethods.WaitForOperationPositive(() => !App.Pages.OrdersPages.CreateWorkpiecePopup.IsOpened(), 20);
             }
         }
 
         public void ClickAddWorkpieceButton()
         {
-            this.App.Pages.OrdersPages.CreateOrderPopup.ClickAddWorkpieceButton();
+            this.App.Pages.OrdersPages.OrderDetails.ClickCreateNewWorkpieceButton();
             Thread.Sleep(500); // sleep because of Edge. Sometimes Add button doesn't work here.
         }
 
@@ -131,13 +143,8 @@
                         CreateOrderPopup.OrderFields.Comments,
                         CreateOrderPopup.OrderFields.Customer,
                         CreateOrderPopup.OrderFields.OrderDeliveryDate,
-                        CreateOrderPopup.OrderFields.OrderId,
-                        CreateOrderPopup.OrderFields.WorkpieceQuantity,
-                        CreateOrderPopup.OrderFields
-                            .WorkpieceDeliveryDate,
-                        CreateOrderPopup.OrderFields.WorkpieceName,
-                        CreateOrderPopup.OrderFields.WorkpieceId
-                    };
+                        CreateOrderPopup.OrderFields.OrderId
+                     };
             Dictionary<CreateOrderPopup.OrderFields, string> states =
                 new Dictionary<CreateOrderPopup.OrderFields, string>();
 
@@ -156,8 +163,6 @@
                 new List<CreateOrderPopup.OrderFields>
                     {
                         CreateOrderPopup.OrderFields.OrderDeliveryDate,
-                        CreateOrderPopup.OrderFields
-                            .WorkpieceDeliveryDate,
                     };
 
             Dictionary<CreateOrderPopup.OrderFields, string> placeholders =
@@ -181,7 +186,7 @@
 
         public bool IsSaveButtonEnabled()
         {
-            return this.App.Pages.OrdersPages.CreateOrderPopup.IsSaveButtonEnabled();
+           return this.App.Pages.OrdersPages.CreateOrderPopup.IsSaveButtonEnabled();
         }
 
         public bool IsCreateOrderPopUpOpened()
@@ -218,15 +223,43 @@
             return this.App.Pages.OrdersPages.OrderDetails.GetWorkpiecesTableTitles();
         }
 
-        public List<WorkpieceGridRecord> GetWorkpieceGridRecords()
+        public List<WorkpieceGridRecord> GetWorkpieceGridRecords(bool shouldFind = false, int timeOutSec = 10)
         {
-            return this.App.Pages.OrdersPages.OrderDetails.GetWorkpieceGridRecords();
+            List<WorkpieceGridRecord> elements = new List<WorkpieceGridRecord>();
+            int count = 0;
+            int c = 0;
+            do
+            {
+                App.Pages.OrdersPages.OrderDetails.WaitForPageLoad();
+                elements = this.App.Pages.OrdersPages.OrderDetails.GetWorkpieceGridRecords();
+                count = elements.Count;
+                if (!shouldFind || count > 0)
+                {
+                    return elements;
+                }
+            }
+            while (count == 0 && c++ <= timeOutSec);
+
+            if (!shouldFind)
+            {
+                return elements;
+            }
+            else
+            {
+                throw new Exception("Can't load workpieces");
+            }
         }
 
         public void ClickWorkpiece(string workpieceId)
         {
             this.App.Pages.OrdersPages.OrderDetails.ClickWorkpieceRecord(workpieceId);
+        }
 
+        public void ClickRandomWorkpiece()
+        {
+            var elements = GetWorkpieceGridRecords(true, 20);
+            var index = new Random().Next(0, elements.Count);
+            this.App.Pages.OrdersPages.OrderDetails.ClickWorkpieceRecord(index);
         }
 
         public void ClickBackLink()
@@ -234,15 +267,24 @@
             this.App.Pages.OrdersPages.OrderDetails.ClickBackLink();
             this.App.Pages.OrdersPages.MainPage.WaitForPageLoad();
         }
-
-        public bool IsAddWorkpieceButtonEnabled()
+        
+        public List<string> GetFilesForWorkpiece()
         {
-            return this.App.Pages.OrdersPages.CreateOrderPopup.IsAddWorkpieceButtonEnabled();
+            return App.Pages.OrdersPages.CreateWorkpiecePopup.GetFilesForWorkpiece();
         }
 
-        public List<string> GetFilesForWorkpiece(string externalWorkpieceId)
+        public bool SaveButtonShouldBeDisabled()
         {
-            return App.Pages.OrdersPages.CreateOrderPopup.GetFilesForWorkpiece(externalWorkpieceId);
+            try
+            {
+                ServiceMethods.WaitForOperationNegative(IsSaveButtonEnabled);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

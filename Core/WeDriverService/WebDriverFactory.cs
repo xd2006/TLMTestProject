@@ -6,7 +6,6 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
-using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Safari;
 
@@ -292,7 +291,7 @@ namespace Core.WeDriverService
         private static IWebDriver CreateLocalDriver(ICapabilities capabilities)
         {
             // Implementation is incomplete: the capabilities are not converted to the options for all browsers
-            string browserType = capabilities.BrowserName;
+            string browserType = (string)capabilities.GetCapability("BrowserName");
 
             if (browserType == new FirefoxOptions().BrowserName)
             {

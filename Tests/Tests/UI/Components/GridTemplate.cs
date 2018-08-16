@@ -26,6 +26,8 @@ namespace Tests.UI.Components
 
         protected readonly By RecordNameLocator = By.CssSelector("table tbody tr > td:nth-of-type(1)");
 
+        public const string GridCellCssSelector = "td";
+
         public IReadOnlyCollection<IWebElement> GetGridLineElements()
         {
             return this.Driver.Finds(this.GridRowLocator);
@@ -33,7 +35,8 @@ namespace Tests.UI.Components
 
         public List<string> GetColumnsNames()
         {
-            return this.Driver.Finds(ColumnNameLocator).Select(e => e.Text).ToList();
+            return this.Driver.Finds(ColumnNameLocator).Select(e => e.Text).ToList().Where(e => e != string.Empty)
+                .ToList();
         }
 
         public void ClickRecord(string recordName)
@@ -46,10 +49,7 @@ namespace Tests.UI.Components
         {
             var parser = new HtmlParser();
             var doc = parser.Parse(this.Driver.PageSource);
-
-            var gridRowCssSelector = GridRowCssLocatorText;
-
-            var rows = doc.QuerySelectorAll(gridRowCssSelector);
+            var rows = doc.QuerySelectorAll(GridRowCssLocatorText);
             return rows;
         }
     }

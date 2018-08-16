@@ -20,32 +20,12 @@ namespace Tests.Helpers.Db
 
         public T GetEntity<T>(Sql query, int retries = 25)
         {
-            int i = 0;
-            T entity = default(T);
-            string message = string.Empty;
+            return GetEntity(Db.Single<T>, query, retries);
+        }
 
-            do
-            {
-                try
-                {
-                    entity = Db.Single<T>(query);
-                    message = string.Empty;
-                }
-                catch (Exception e)
-                {
-                    message = e.Message;
-                    Thread.Sleep(500);
-                }
-            }
-            while (message != string.Empty && i++ < retries);
-
-            if (i >= retries)
-            {
-                throw new Exception(message);
-            }
-
-            return entity;
-
+        public T GetEntity<T>(int primaryKey, int retries = 25)
+        {
+            return GetEntity(Db.Single<T>, primaryKey, retries);         
         }
 
         public List<T> GetEntities<T>(Sql query, int retries = 25)
@@ -75,6 +55,35 @@ namespace Tests.Helpers.Db
             }
            
             return entities;
+        }
+
+        private T GetEntity<T>(Func<object, T> action, object query, int retries = 25)
+        {
+            int i = 0;
+            T entity = default(T);
+            string message = string.Empty;
+
+            do
+            {
+                try
+                {
+                    entity = action(query);
+                    message = string.Empty;
+                }
+                catch (Exception e)
+                {
+                    message = e.Message;
+                    Thread.Sleep(500);
+                }
+            }
+            while (message != string.Empty && i++ < retries);
+
+            if (i >= retries)
+            {
+                throw new Exception(message);
+            }
+
+            return entity;
         }
     }
 }

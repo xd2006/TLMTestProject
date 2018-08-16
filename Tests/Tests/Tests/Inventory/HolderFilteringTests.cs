@@ -52,12 +52,12 @@ namespace Tests.Tests.Inventory
             Dictionary<FilterSearchData.Filters, object> filters =
                 new Dictionary<FilterSearchData.Filters, object>
                     {
-                        { FilterSearchData.Filters.Search, "D16" },
-                        { FilterSearchData.Filters.ToolLength, 76000000 },
+                        { FilterSearchData.Filters.Search, "D32" },
+                        { FilterSearchData.Filters.ToolLength, 50000000 },
                         { FilterSearchData.Filters.Cooling, false },
                         { FilterSearchData.Filters.AvaliabilityInStock, true }
                     };
-            this.ResetFiltersTest(this.App.Ui.ToolsMain.ResetSearchAndFilters, filters, FilterSearchData.ToolsTypes.Holders);
+            this.ResetFiltersTest(this.App.Ui.ToolsMain.ResetFiltersAndSearch, filters, FilterSearchData.ToolsTypes.Holders);
         }
 
         [Test]
@@ -69,8 +69,8 @@ namespace Tests.Tests.Inventory
             Dictionary<FilterSearchData.Filters, object> filters =
                 new Dictionary<FilterSearchData.Filters, object>
                     {
-                        { FilterSearchData.Filters.Search, "D16" },
-                        { FilterSearchData.Filters.ToolLength, 76000000 },
+                        { FilterSearchData.Filters.Search, "D32" },
+                        { FilterSearchData.Filters.ToolLength, 60000000 },
                         { FilterSearchData.Filters.Cooling, false },
                         { FilterSearchData.Filters.AvaliabilityInStock, true }
                     };
@@ -123,6 +123,9 @@ namespace Tests.Tests.Inventory
             Dictionary<FilterSearchData.Filters, object> filters =
                 new Dictionary<FilterSearchData.Filters, object>
                     {
+                        {
+                            FilterSearchData.Filters.Search, expectedNames[0]
+                        },
                         {
                             FilterSearchData.Filters.ToolLength, toolLength
                         },
@@ -213,10 +216,10 @@ namespace Tests.Tests.Inventory
                 get
                 {
                     yield return new TestCaseData(
-                            86000000,
+                            126000000,
                             false,
-                            true,
-                            new List<string> { "D20      SCHRUMPF POKOLM-2      EL60 HSK50" })
+                            false,
+                            new List<string> { "D16      SCHRUMPF POKOLM        EL100 HSK50" })
                         .SetProperty("TestCase", "183").SetProperty("TestCase", "184");                  
                 }
             }

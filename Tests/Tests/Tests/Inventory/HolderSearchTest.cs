@@ -1,4 +1,6 @@
 ﻿
+using Core.Service;
+
 namespace Tests.Tests.Inventory
 {
     using System.Collections;
@@ -11,6 +13,9 @@ namespace Tests.Tests.Inventory
 
     using NUnit.Framework;
 
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
+    [Category("Search")]
     public class HolderSearchTest : InventoryTestsTemplate
     {
 
@@ -78,7 +83,7 @@ namespace Tests.Tests.Inventory
                         },
                         { FilterSearchData.Filters.Cooling, cooling },
                         { FilterSearchData.Filters.ToolGroup, toolGroup },
-                        { FilterSearchData.Filters.ToolSubGroup, toolSubGroup},
+                        { FilterSearchData.Filters.Type, toolSubGroup},
                         {
                             FilterSearchData.Filters.AvaliabilityInStock,
                             availableInStock
@@ -92,6 +97,23 @@ namespace Tests.Tests.Inventory
                     Assert.True(results.Count.Equals(expectedNames.Count), "Invalid number of items was returned");
                     Assert.True(results.All(r => expectedNames.Contains(r.Name)), "Invalid results were returned");
                 });
+        }
+
+        [Test]
+        [Category("UI")]
+        [Property("Reference", "TLM-70")]
+        [Property("TestCase", "166")]
+        public void HoldersContentOfTheGrid()
+        {
+            var expectedColumns = new List<string> { "NAME", "SIZE", "LENGTH", "QUANTITY" };
+
+            this.App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Holders);
+            var columnNames = this.App.Ui.ToolsMain.GetGridColumnsNames();
+            columnNames = ServiceMethods.RemoveStringsInList(columnNames, new List<string> { "▲", "▼" });
+
+            var columnNamesToUpper = new List<string>();
+            columnNames.ForEach(e => columnNamesToUpper.Add(e.ToUpper()));
+            Assert.That(columnNamesToUpper.SequenceEqual(expectedColumns), "Grid columns names are not as expected");
         }
 
 

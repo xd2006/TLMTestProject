@@ -1,4 +1,6 @@
 ﻿
+using Core.Utils;
+
 namespace Tests.Helpers.UI.Orders
 {
     using System;
@@ -41,6 +43,12 @@ namespace Tests.Helpers.UI.Orders
 
         public Dictionary<WorkpieceDetails.TaskFields, string> GetTaskInputFieldsStates()
         {
+
+            if (!App.Pages.OrdersPages.CreateTaskPopup.IsOpened())
+            {
+                App.Pages.OrdersPages.WorkpieceDetails.ClickCreateNewTask();
+            }
+
             Dictionary<WorkpieceDetails.TaskFields, string> states = new Dictionary<WorkpieceDetails.TaskFields, string>();
 
             List<WorkpieceDetails.TaskFields> fields =
@@ -56,7 +64,7 @@ namespace Tests.Helpers.UI.Orders
           
             foreach (var field in fields)
             {
-                var state = this.App.Pages.OrdersPages.WorkpieceDetails.GetFieldState(field);
+                var state = this.App.Pages.OrdersPages.CreateTaskPopup.GetFieldState(field);
                 states.Add(field, state);
             }
             
@@ -76,7 +84,7 @@ namespace Tests.Helpers.UI.Orders
 
             foreach (var field in fields)
             {
-                var fieldPlaceholder = this.App.Pages.OrdersPages.WorkpieceDetails.GetFieldPlaceholder(field);
+                var fieldPlaceholder = this.App.Pages.OrdersPages.CreateTaskPopup.GetFieldPlaceholder(field);
 
                 placeholders.Add(field, fieldPlaceholder);
             }
@@ -87,26 +95,30 @@ namespace Tests.Helpers.UI.Orders
         public void AddNewTask(Task task, bool populateOnly = false)
         {
             var machine = this.App.GraphApi.ProjectManager.GetMachine(task.MachineId);
-            
-            this.App.Pages.OrdersPages.WorkpieceDetails.PopulateField(
+
+            if (!App.Pages.OrdersPages.CreateTaskPopup.IsOpened())
+            {
+                App.Pages.OrdersPages.WorkpieceDetails.ClickCreateNewTask();
+            }
+
+            this.App.Pages.OrdersPages.CreateTaskPopup.PopulateField(
                 WorkpieceDetails.TaskFields.Name, task.Name);
-            this.App.Pages.OrdersPages.WorkpieceDetails.PopulateField(
+            this.App.Pages.OrdersPages.CreateTaskPopup.PopulateField(
                 WorkpieceDetails.TaskFields.DurationPerWorkpiece,
                 task.DurationPerWorkpiece.ToString());
-            this.App.Pages.OrdersPages.WorkpieceDetails.PopulateField(
+            this.App.Pages.OrdersPages.CreateTaskPopup.PopulateField(
                 WorkpieceDetails.TaskFields.DurationInTotal, task.DurationPerTotal.ToString());
-            this.App.Pages.OrdersPages.WorkpieceDetails.PopulateField(
+            this.App.Pages.OrdersPages.CreateTaskPopup.PopulateField(
                 WorkpieceDetails.TaskFields.Start, task.StartDate.ToString("yyyy-MM-dd"));
-            this.App.Pages.OrdersPages.WorkpieceDetails.PopulateField(
+            this.App.Pages.OrdersPages.CreateTaskPopup.PopulateField(
                 WorkpieceDetails.TaskFields.End, task.EndDate.ToString("yyyy-MM-dd"));
-            this.App.Pages.OrdersPages.WorkpieceDetails.PopulateField(
+            this.App.Pages.OrdersPages.CreateTaskPopup.PopulateField(
                 WorkpieceDetails.TaskFields.Machine, machine.name);
 
             if (!populateOnly)
             {
                 var initialNumberOfRecords = this.App.Pages.OrdersPages.WorkpieceDetails.GetTasksGridRecords().Count;
-                this.App.Pages.OrdersPages.WorkpieceDetails.ClickAddTask();
-
+              App.Pages.OrdersPages.CreateTaskPopup.ClickAddTaskButton();
                 int counter = 0; 
                 int recordsNumber;
                 do
@@ -119,7 +131,7 @@ namespace Tests.Helpers.UI.Orders
                         Thread.Sleep(1000);
                     }
                 }
-                while (recordsNumber <= initialNumberOfRecords && counter++ < 10);
+                while (recordsNumber <= initialNumberOfRecords && counter++ < 15);
 
                 if (counter >= 10)
                 {
@@ -128,9 +140,24 @@ namespace Tests.Helpers.UI.Orders
             }
         }
 
-        public List<TaskGridRecord> GetTasksRecords()
+        public List<TaskGridRecord> GetTasksRecords(bool shouldFound = true, int timeOutSec = 20)
         {
-            return this.App.Pages.OrdersPages.WorkpieceDetails.GetTasksGridRecords();
+            List<TaskGridRecord> records = new List<TaskGridRecord>();
+            int count;
+            int counter = 0;
+            do
+            {
+                records = this.App.Pages.OrdersPages.WorkpieceDetails.GetTasksGridRecords();
+                count = records.Count;
+                if (count == 0 && counter > 0)
+                {
+                    Thread.Sleep(1000);
+                }
+            }
+            while (shouldFound && count == 0 && counter++ < timeOutSec);
+
+            return records;
+
         }
 
         public void AddCamFileForTask(string taskName, string filePath, bool checkAdded = true)
@@ -168,6 +195,123 @@ namespace Tests.Helpers.UI.Orders
                     throw new Exception("Can't add cam file");
                 }
             }          
-        }     
+        }
+
+        public void ClickCamFile(string task)
+        {
+            App.Pages.OrdersPages.WorkpieceDetails.ClickCamFile(task);
+        }
+
+        public bool IsSaveWorkpieceButtonEnabled()
+        {
+            return this.App.Pages.OrdersPages.CreateWorkpiecePopup.IsSaveButtonEnabled();
+        }
+
+        public void ClickSaveButton()
+        {
+            App.Pages.OrdersPages.CreateWorkpiecePopup.ClickSaveButton();
+        }
+
+        public List<string> GetWorkpieceFieldsNames()
+        {
+            return App.Pages.OrdersPages.CreateWorkpiecePopup.GetFieldsNames();
+        }
+
+        public Dictionary<CreateWorkpiecePopup.WorkpieceFields, string> GetCreateWorkpieceFieldsPlaceholders()
+        {
+            List<CreateWorkpiecePopup.WorkpieceFields> fields =
+                new List<CreateWorkpiecePopup.WorkpieceFields>
+                    {
+                        CreateWorkpiecePopup.WorkpieceFields.WorkpieceDeliveryDate
+                    };
+
+            Dictionary<CreateWorkpiecePopup.WorkpieceFields, string> placeholders =
+                new Dictionary<CreateWorkpiecePopup.WorkpieceFields, string>();
+
+            foreach (var field in fields)
+            {
+                var fieldPlaceholder = this.App.Pages.OrdersPages.CreateWorkpiecePopup.GetFieldPlaceholder(field);
+                placeholders.Add(field, fieldPlaceholder);
+            }
+
+            return placeholders;
+        }
+
+        public Dictionary<CreateWorkpiecePopup.WorkpieceFields, string> GetWorkpieceInputFieldsStates()
+        {
+            Dictionary<CreateWorkpiecePopup.WorkpieceFields, string> states = new Dictionary<CreateWorkpiecePopup.WorkpieceFields, string>();
+
+            List<CreateWorkpiecePopup.WorkpieceFields> fields =
+                new List<CreateWorkpiecePopup.WorkpieceFields>
+                    {
+                        CreateWorkpiecePopup.WorkpieceFields.WorkpieceId,
+                        CreateWorkpiecePopup.WorkpieceFields.WorkpieceName,
+                        CreateWorkpiecePopup.WorkpieceFields.WorkpieceQuantity,
+                        CreateWorkpiecePopup.WorkpieceFields.WorkpieceDeliveryDate                     
+                    };
+
+            foreach (var field in fields)
+            {
+                var state = this.App.Pages.OrdersPages.CreateWorkpiecePopup.GetFieldState(field);
+                states.Add(field, state);
+            }
+
+            return states;
+        }
+
+        public void PopulateField(CreateWorkpiecePopup.WorkpieceFields field, string value)
+        {        
+           this.App.Pages.OrdersPages.CreateWorkpiecePopup.PopulateField(field, value);           
+        }
+
+        public void ClickCreateNewTaskButton()
+        {
+            App.Pages.OrdersPages.WorkpieceDetails.ClickCreateNewTask();
+        }
+
+        public void AddFilesForWorkpiece(List<string> files)
+        {
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    App.Pages.OrdersPages.CreateWorkpiecePopup.AddFileForWorkpice(file);
+                }
+            }
+        }
+
+        public void DeleteFilesForWorkpiece(List<string> files)
+        {
+            if (files != null && files.Count > 0)
+            {
+                foreach (var file in files)
+                {
+                    App.Pages.OrdersPages.CreateWorkpiecePopup.DeleteFileForWorkpice(file);
+                }
+            }
+        }
+
+        public List<string> GetTabListForWorkpieceDetailes()
+        {
+            return App.Pages.OrdersPages.WorkpieceDetails.GetTabsNameList();
+        }
+
+        public void NavigateToTab(WorkpieceDetails.WorkpieceDetailsTabs tabName)
+        {
+            App.Pages.OrdersPages.WorkpieceDetails.NavigateToTab(tabName);
+        }
+
+        public List<string> GetFilesGridColumnNames 
+            => App.Pages.OrdersPages.WorkpieceDetails.GetFilesGridColumnsNames();
+
+        public List<FilesGridRecord> GetFilesGridRecords
+            => App.Pages.OrdersPages.WorkpieceDetails.GetFilesGridRecords();
+
+        public string GetRandomLinkFromFilesGrid()
+        {
+            var grid = GetFilesGridRecords;
+            var index = new Random().Next(0, grid.Count);
+            return App.Pages.OrdersPages.WorkpieceDetails.GetUriInLinkFromFilesGrid(grid[index].Name);
+        }
     }
 }

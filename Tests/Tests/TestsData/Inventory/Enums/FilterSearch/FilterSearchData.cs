@@ -12,13 +12,13 @@ namespace Tests.TestsData.Inventory.Enums.FilterSearch
             ToolLength,
             Cooling,
             ToolGroup,
-            ToolSubGroup,
+            Type,
             AvaliabilityInStock
         }
 
         public enum ToolsTypes
         {
-            Assemblies,
+            Tools,
             Cutters,
             Holders
         }

@@ -1,5 +1,7 @@
 ﻿namespace Tests.Service
 {
+    using System.Web.Configuration;
+
     using global::Tests.Managers;
     using global::Tests.Parameters;
 
@@ -37,11 +39,11 @@
         /// </returns>
         private static ICapabilities DefineCapabilities(string browser)
         {
-            DesiredCapabilities capabilities = new DesiredCapabilities();
-            capabilities.SetCapability(CapabilityType.BrowserName, browser);
+            var capabilities = new DesiredCapabilities();
+            capabilities.SetCapability("BrowserName", browser);
             if (browser.ToLower().Equals("chrome"))
             {
-                capabilities.SetCapability("timeZone", "Europe/London");
+                capabilities.SetCapability("timeZone", "Europe/Athens");
             }
 
             return capabilities;

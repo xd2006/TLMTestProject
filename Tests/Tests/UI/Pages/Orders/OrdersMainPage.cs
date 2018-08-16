@@ -34,6 +34,7 @@ namespace Tests.UI.Pages.Orders
 
         public List<string> GetOrdersGridColumnsNames()
         {
+            this.WaitForPageLoad();
             return this.OrdersGrid.GetColumnsNames();
         }
         

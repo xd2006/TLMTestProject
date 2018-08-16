@@ -1,6 +1,7 @@
 ﻿
 namespace Tests.Helpers.UI.Link
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
 
@@ -15,6 +16,9 @@ namespace Tests.Helpers.UI.Link
         {
         }
 
+
+        private string linkInitialText = "Please scan object now";
+
         public List<string> GetItemsDescriptions()
         {
            return App.Pages.GeneralPages.LinkPage.GetItemsInfo();
@@ -22,7 +26,7 @@ namespace Tests.Helpers.UI.Link
 
         public void PopulateFirstItem(string itemGuid)
         {
-            string initialDescription = "Please scan the first item now";
+            string initialDescription = this.linkInitialText;
             App.Pages.GeneralPages.LinkPage.PopulateItem(1, itemGuid);
 
             this.WaitItemDescriptionUpdated(initialDescription, 1);
@@ -30,7 +34,7 @@ namespace Tests.Helpers.UI.Link
 
         public void PopulateSecondItem(string itemGuid)
         {
-            string initialDescription = "Please scan the second item now";
+            string initialDescription = this.linkInitialText;
             App.Pages.GeneralPages.LinkPage.PopulateItem(2, itemGuid);
 
             this.WaitItemDescriptionUpdated(initialDescription, 2);
@@ -53,6 +57,7 @@ namespace Tests.Helpers.UI.Link
             if (counter >= 10)
             {
                 this.App.Logger.Warn("Link item description wasn't updated");
+                throw new Exception("Item description wasn't updated");
             }
         }
 

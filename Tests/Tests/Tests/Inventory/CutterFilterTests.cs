@@ -55,16 +55,16 @@ namespace Tests.Tests.Inventory
             Dictionary<FilterSearchData.Filters, object> filters =
                 new Dictionary<FilterSearchData.Filters, object>
                     {
-                        { FilterSearchData.Filters.Search, "ADW" },
+                        { FilterSearchData.Filters.Search, "POKOLM" },
                         { FilterSearchData.Filters.UsageMaterial, null },
                         { FilterSearchData.Filters.ToolMaterial, "WPL" },
-                        { FilterSearchData.Filters.ToolSize, 23000000 },
-                        { FilterSearchData.Filters.ToolLength, 400000000 },
+                        { FilterSearchData.Filters.ToolSize, 66000000 },
+                        { FilterSearchData.Filters.ToolLength, 53000000 },
                         { FilterSearchData.Filters.Cooling, false },
                         { FilterSearchData.Filters.ToolGroup, null },
                         { FilterSearchData.Filters.AvaliabilityInStock, false }
                     };
-            this.ResetFiltersTest(this.App.Ui.ToolsMain.ResetSearchAndFilters, filters, FilterSearchData.ToolsTypes.Cutters);
+            this.ResetFiltersTest(this.App.Ui.ToolsMain.ResetFiltersAndSearch, filters, FilterSearchData.ToolsTypes.Cutters);
         }
 
         [Test]
@@ -76,11 +76,11 @@ namespace Tests.Tests.Inventory
             Dictionary<FilterSearchData.Filters, object> filters =
                                 new Dictionary<FilterSearchData.Filters, object>
                                     {
-                                        { FilterSearchData.Filters.Search, "ADW" },
+                                        { FilterSearchData.Filters.Search, "HITACHI" },
                                         { FilterSearchData.Filters.UsageMaterial, null },
                                         { FilterSearchData.Filters.ToolMaterial, "WPL" },
-                                        { FilterSearchData.Filters.ToolSize, 23000000 },
-                                        { FilterSearchData.Filters.ToolLength, 400000000 },
+                                        { FilterSearchData.Filters.ToolSize, 20000000 },
+                                        { FilterSearchData.Filters.ToolLength, 30000000 },
                                         { FilterSearchData.Filters.Cooling, false },
                                         { FilterSearchData.Filters.ToolGroup, null },
                                         { FilterSearchData.Filters.AvaliabilityInStock, false }
@@ -93,19 +93,18 @@ namespace Tests.Tests.Inventory
         [Property("Reference", "TLM-70")]
         [Property("TestCase", "379")]
         public void CutterAssemblyGroupAndSubgroupFiltering()
-        {
-
+        {           
             Dictionary<FilterSearchData.Filters, object> filters = new Dictionary<FilterSearchData.Filters, object>
                                                                        {
                                                                            {
                                                                                FilterSearchData.Filters.ToolGroup, "Mill"
                                                                            },
                                                                            {
-                                                                               FilterSearchData.Filters.ToolSubGroup, "Cone"
+                                                                               FilterSearchData.Filters.Type, "Cone"
                                                                            }
                                                                        };
 
-            var resultsApi = this.ApiFilteringTest<CutterAssembly>(filters);
+            var resultsApi = this.ApiFilteringTest<CutterAssembly>(filters, 25);
 
             this.App.Ui.ToolsMain.SelectToolType(FilterSearchData.ToolsTypes.Cutters);
             this.App.Ui.ToolsMain.PerformFiltering(filters);
@@ -182,7 +181,7 @@ namespace Tests.Tests.Inventory
                         },
                         { FilterSearchData.Filters.Cooling, cooling },
                         { FilterSearchData.Filters.ToolGroup, toolGroup },
-                        { FilterSearchData.Filters.ToolSubGroup, toolSubGroup},
+                        { FilterSearchData.Filters.Type, toolSubGroup},
                         {
                             FilterSearchData.Filters.AvaliabilityInStock,
                             availableInStock
@@ -225,7 +224,7 @@ namespace Tests.Tests.Inventory
                         { FilterSearchData.Filters.ToolLength, 400000000 },
                         { FilterSearchData.Filters.Cooling, false },
                         { FilterSearchData.Filters.ToolGroup, "Drill" },
-                        { FilterSearchData.Filters.ToolSubGroup, "Boring" },
+                        { FilterSearchData.Filters.Type, "Boring" },
                         {
                             FilterSearchData.Filters.AvaliabilityInStock,
                             false

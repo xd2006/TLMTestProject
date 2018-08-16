@@ -2,7 +2,10 @@
 namespace Tests.Tests.Link
 {
     using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
 
+    using global::Tests.Models.ToolManager.GraphQlModels.ToolAssembly;
     using global::Tests.Tests.Link.Templates;
     using global::Tests.TestsData.Common.Enums;
 
@@ -25,11 +28,11 @@ namespace Tests.Tests.Link
         [Property("TestCase", "1222")]
         public void CheckValidItemIdentifiaction()
         {
-            string itemGuid1 = "P1575ZSYZG90GKOJ";
-            string expectedDescription1 = "120W158H000F6060";
+            string itemGuid1 = "VEQUJ67U0OEODQLT";
+            string expectedDescription1 = "160W128H000F8080";
 
-            string itemGuid2 = "E00401504C2C2C08";
-            string expectedDescription2 = "Machine 1";
+            string itemGuid2 = "E001504334667457865";
+            string expectedDescription2 = "Preset Machine 5";
 
             App.Ui.Main.NavigateToSectionInSideMenu(SidePanelData.Sections.ToolLinking);
             var descriptions = App.Ui.Link.GetItemsDescriptions();
@@ -46,20 +49,20 @@ namespace Tests.Tests.Link
                 () =>
                     {
                         Assert.True(
-                            descriptions[0].Equals("Please scan the first item now")
-                            && descriptions[1].Equals("Please scan the second item now"),
+                            descriptions[0].Equals("Please scan object now")
+                            && descriptions[1].Equals("2"),
                             "Initial items description is incorrect");
                         Assert.True(
                             descriptionsAfterScan[0].Equals(expectedDescription1) && descriptionsAfterScan[1]
-                                .Equals("Please scan the second item now"),
+                                .Equals("Please scan object now"),
                             "Items description after scan is incorrect");
                         Assert.True(
                             descriptionsAfterScan2[0].Equals(expectedDescription1) && descriptionsAfterScan2[1]
                                 .Equals(expectedDescription2),
                             "Items descriptions after 2nd scan are incorrect");
                         Assert.True(
-                            descriptionsAfterNewLink[0].Equals("Please scan the first item now")
-                            && descriptionsAfterNewLink[1].Equals("Please scan the second item now"),
+                            descriptionsAfterNewLink[0].Equals("Please scan object now")
+                            && descriptionsAfterNewLink[1].Equals("2"),
                             "Initial items description is incorrect");
                         Assert.True(
                             items[0].Equals(itemGuid1) && items[1].Equals(string.Empty),
@@ -74,7 +77,7 @@ namespace Tests.Tests.Link
         [Test, TestCaseSource(typeof(ToolsDataSource), nameof(ToolsDataSource.TestCasesNegative))]
         [Category("UI")]
         [Property("Reference", "TLM-137")]
-        public void CheckLinkValidation(string item1, string item2, string expectedErrorMessage)
+        public void CheckLinkValidation(string item1, string item2, List<string> expectedErrorMessage)
         {
 
             App.Ui.Main.NavigateToSectionInSideMenu(SidePanelData.Sections.ToolLinking);
@@ -83,8 +86,60 @@ namespace Tests.Tests.Link
 
             var message = App.Ui.Link.GetFailureResultMessage();
 
-            Assert.True(message.Equals(expectedErrorMessage), $"Error message is invalid. Expected: {expectedErrorMessage}");
+            Assert.True(expectedErrorMessage.Contains(message), $"Error message is invalid. Expected: {expectedErrorMessage}");
         }
+
+        [Test]
+        [Category("UI")]
+        [Property("Reference", "TLM-137")]
+        [Property("TestCase", "1761")]
+        [Property("TestCase", "1762")]
+        public void ToolAndLocationLinkingTest()
+        {
+            #region test data
+
+            Dictionary<string, string> locations =
+                new Dictionary<string, string> { { "Magazine 5", "QWER1234" }, { "Magazine 1", "0WW7SYY1QP8QFGWJ" } };
+
+            ToolAssembly targetAssembly = new ToolAssembly
+                                              {
+                                                  Id = "128",
+                                                  Name = "006K066S000F0122"                                                 
+                                              };
+            string targetAssemblyInstanceGuid = "TESTINGVG1QWERTY1";
+            int toolInstanceId = 81;
+
+            #endregion
+
+            App.Ui.ToolsMain.OpenToolAssemblyDirectly(targetAssembly.Id);
+            var instanceInStock =
+                App.Ui.ToolManagerToolInfo.GetToolInstances().First(i => i.Id.Equals(toolInstanceId));
+            
+            var targetLocation = locations.First(l => !l.Key.Equals(instanceInStock.Location));
+
+            for (int i = 0; i < 2; i++)
+            {
+                App.Ui.Main.NavigateToSectionInSideMenu(SidePanelData.Sections.ToolLinking);
+
+                App.Ui.Link.PopulateFirstItem(targetAssemblyInstanceGuid);
+                App.Ui.Link.PopulateSecondItem(targetLocation.Value);
+
+                var message = App.Ui.Link.GetSuccessResultMessage();
+
+                Assert.True(message.Equals("Success"), "Linking wasn't successful");
+
+                App.Ui.Link.CloseLinkPopup();
+                App.Ui.ToolsMain.OpenToolAssemblyDirectly(targetAssembly.Id);
+
+                instanceInStock = App.Ui.ToolManagerToolInfo.GetToolInstances()
+                    .First(ins => ins.Id.Equals(toolInstanceId));
+
+                Assert.True(instanceInStock.Location.Equals(targetLocation.Key));
+
+                targetLocation = locations.First(l => !l.Key.Equals(targetLocation.Key));
+            }
+        }
+
 
         private class ToolsDataSource
         {
@@ -92,15 +147,12 @@ namespace Tests.Tests.Link
             {
                 get
                 {
-                    yield return new TestCaseData("PFPI8MW9ZCRMJCNH", "6VAY058R5GC9O8EH", "Incompatible types").SetProperty("TestCase", "1227");
-                    yield return new TestCaseData("E00401504C2C2C08", "YE9UMDSOIS34VQAA", "No consumer found").SetProperty("TestCase", "1258");
-                    yield return new TestCaseData("E00401504C2C2C08", "E10411514C2C2C18", "Incorrect identifier").SetProperty("TestCase", "1259");
-                    yield return new TestCaseData("E00411514C2C2C18", "JG9YAXPO8BJQ0Z8R", "Incorrect type").SetProperty("TestCase", "1260");
-                    yield return new TestCaseData("WFRQOTTD6WW6FN1J", "WFRQOTTD6WW6FN1J", "Unknown error").SetProperty("TestCase", "1218");
+                    yield return new TestCaseData("E001504334667457865", "E001504334667546605", new List<string> {"Incompatible types"}).SetProperty("TestCase", "1227");
+                    yield return new TestCaseData("E001504334667457865", "SDT8W21IBNOGKYSH", new List<string> {"No consumer found"}).SetProperty("TestCase", "1258");
+                    yield return new TestCaseData("I9ZFAIUHGZXJZRMR", "I9ZFAIUHGZXJZRMRT", new List<string> { "Incorrect identifier", "Incorrect id" }).SetProperty("TestCase", "1259");
+                    yield return new TestCaseData("I9ZFAIUHGZXJZRMR", "9ULOZ5NJ3PX7NNYU", new List<string> {"Incorrect type", "Unknown type" }).SetProperty("TestCase", "1260");
+                    yield return new TestCaseData("I9ZFAIUHGZXJZRMR", "I9ZFAIUHGZXJZRMR", new List<string> {"Unknown error"}).SetProperty("TestCase", "1218");}
                 }
-            }
-            
+            }          
         }
-
     }
-}

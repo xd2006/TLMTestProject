@@ -81,16 +81,16 @@ namespace Tests.Helpers.GraphApi.ToolManager
         }
 
 
-        public List<CuttingMaterial> GetCuttingMaterials()
+        public List<Material> GetCuttingMaterials()
         {
-          return this.PostRequestWithRetry<List<CuttingMaterial>>(
+          return this.PostRequestWithRetry<List<Material>>(
                 this.ToolManagerRequests.Service.GetCuttingMaterials(),
                 "cuttingMaterials");
         }
 
-        public List<CuttingMaterial> GetUsageMaterials()
+        public List<Material> GetUsageMaterials()
         {
-            return this.PostRequestWithRetry<List<CuttingMaterial>>(
+            return this.PostRequestWithRetry<List<Material>>(
                 this.ToolManagerRequests.Service.GetUsageMaterials(),
                 "machinedMaterials");
         }
@@ -208,10 +208,10 @@ namespace Tests.Helpers.GraphApi.ToolManager
                     .First(g => g.Name.Equals(filters[FilterSearchData.Filters.ToolGroup])).Id;
             }
 
-            if (filters.ContainsKey(FilterSearchData.Filters.ToolSubGroup))
+            if (filters.ContainsKey(FilterSearchData.Filters.Type))
             {
-                applyFilters[FilterSearchData.Filters.ToolSubGroup] = this.GetCutterGroups()
-                    .First(g => g.Name.Equals(filters[FilterSearchData.Filters.ToolSubGroup])).Id;
+                applyFilters[FilterSearchData.Filters.Type] = this.GetCutterGroups()
+                    .First(g => g.Name.Equals(filters[FilterSearchData.Filters.Type])).Id;
             }
 
             if (filters.ContainsKey(FilterSearchData.Filters.ToolMaterial))

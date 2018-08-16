@@ -20,6 +20,8 @@ namespace Tests.UI.Pages.Orders
 
         private readonly By backLinkLocator = By.CssSelector("button[class$='history-back_overridenButton']");
 
+        private readonly By createNewWorkpieceButtonLocator = By.CssSelector("button[class$='order-details_addButton']");
+
         public OrdersOrderDetailsPage(IWebDriver driver)
             : base(driver)
         {
@@ -58,9 +60,20 @@ namespace Tests.UI.Pages.Orders
             this.WaitForPageLoad();
         }
 
+        public void ClickWorkpieceRecord(int index)
+        {
+            this.WorkpiecesGrid.ClickRecord(index);
+            this.WaitForPageLoad();
+        }
+
         public void ClickBackLink()
         {
             this.Driver.Find(this.backLinkLocator).Click();
+        }
+
+        public void ClickCreateNewWorkpieceButton()
+        {
+            Driver.Click(this.createNewWorkpieceButtonLocator);
         }
     }
 }

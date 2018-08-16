@@ -1,5 +1,6 @@
 ﻿namespace Tests.UI.Components.Orders
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -11,6 +12,7 @@
     using global::Tests.UI.Components.Interfaces;
 
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Interactions;
 
     public class WorkplanTasksGrid : GridTemplate, IGrid<TaskGridRecord>
     {
@@ -18,6 +20,8 @@
             : base(driver)
         {
         }
+
+        private string camFileCellMask = "//table/tbody[.//td[.='{0}']]//td[7]/button";
 
         public List<TaskGridRecord> GetRecords()
         {
@@ -43,9 +47,9 @@
                     task.Name = cellsTexts[0];
                     task.DurationPerWorkpiece = cellsTexts[1];
                     task.DurationInTotal = cellsTexts[2];
-                    task.Start = cellsTexts[3];
-                    task.End = cellsTexts[4];
-                    task.Machine = cellsTexts[5];
+                    task.Machine = cellsTexts[3];
+                    task.Start = cellsTexts[4];
+                    task.End = cellsTexts[5];
                     task.CamFile = cellsTexts[6];
                     entities.Add(task);
                 }
@@ -57,7 +61,7 @@
 
         public new void ClickRecord(string workplanName)
         {
-            By recordNameLocator = By.CssSelector("table tr[class$=_table_row] > td:nth-of-type(1)");
+            By recordNameLocator = By.CssSelector("table tr[class$=row_root] > td:nth-of-type(1)");
             this.Driver.Finds(recordNameLocator).Where(t => t.Text.Equals(workplanName)).ToList().First().Click();
         }
 
@@ -67,7 +71,12 @@
             var neededTask = records.First(r => r.Name.Equals(taskName));
             var rows = this.Driver.Finds(this.GridRowLocator).ToList();
             var row = rows[records.IndexOf(neededTask)];
-            row.FindElement(By.CssSelector("input.react-fine-uploader-file-input")).SendKeys(filePath);
+            row.FindElement(By.CssSelector("input.react-fine-uploader-file-input")).SendKeys(filePath);                      
+        }
+
+        public void ClickCamFileLink(string taskName)
+        {
+            Driver.Find(By.XPath(string.Format(this.camFileCellMask, taskName))).Click();
         }
     }
 }

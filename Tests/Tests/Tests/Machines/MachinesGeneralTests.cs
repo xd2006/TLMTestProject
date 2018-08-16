@@ -14,15 +14,15 @@ namespace Tests.Tests.Machines
     using global::Tests.TestsData.Common.Enums;
 
     using NUnit.Framework;
+    using NUnit.Framework.Constraints;
 
     using PetaPoco;
 
     [TestFixture]
-    [Parallelizable(ParallelScope.All)]
-    [Category("Machines")]
+    [Parallelizable(ParallelScope.Fixtures)]
+    [Category("Machines")]   
     public class MachinesGeneralTests : MachinesTestTemplate
     {
-
         [Test]
         [Category("API")]
         public void CheckMachinesRequest()
@@ -61,6 +61,7 @@ namespace Tests.Tests.Machines
         
         [Test]
         [Category("UI")]
+        [Retry(2)] // because of false fails during regular run
         [Property("Reference", "TLM-133")]
         [Property("TestCase", "1246")]
         [Property("TestCase", "1248")]
@@ -70,11 +71,11 @@ namespace Tests.Tests.Machines
         [Property("TestCase", "1252")]
         [Property("TestCase", "1251")]
         [Property("TestCase", "1254")]
-        public void MachineInformation()
+       public void MachineInformation()
         {
             #region Get test data
 
-            string machineToCheck = "Machine 2";
+            string machineToCheck = "Machine 1"; //ToDo: Check for all machines after implementing task sorting logic
 
             var machine = App.GraphApi.ProjectManager.GetMachines().First(m => m.name.Equals(machineToCheck));
             var apiMachineTasks = App.GraphApi.ProjectManager.GetMachineTasks(machine.id);
@@ -90,7 +91,7 @@ namespace Tests.Tests.Machines
 
             #endregion
 
-            var machineInfo = App.Ui.Machines.GetMachinesInfo().First(m => m.Machine.Equals(machineToCheck));
+            var machineInfo = App.Ui.Machines.GetMachinesInfo(true, 50).First(m => m.Machine.Equals(machineToCheck));
 
             var workplanId = App.Db.ProjectManager.GetTask(currentTask.Id).WorkplanId;
             var workplan = App.Db.ProjectManager.GetWorkplan(workplanId);
@@ -99,10 +100,8 @@ namespace Tests.Tests.Machines
             Assert.Multiple(
                 () =>
                     {
-                        Assert.True(machineInfo.Workpiece.Equals(workpiece.Name), $"Workpiece name is incorrect. Expected: {workpiece.Name}. Actual: {machineInfo.Workpiece}");
-                        Assert.True(machineInfo.Qty.Equals(workpiece.Quantity.ToString()), $"Quantity is incorrect. Expected: {workpiece.Quantity}. Actual: {machineInfo.Qty}");
+                        Assert.True(machineInfo.WorkpieceName.Equals(workpiece.Name), $"Workpiece name is incorrect. Expected: {workpiece.Name}. Actual: {machineInfo.WorkpieceName}");
                         Assert.True(machineInfo.CurrentTask.Equals(currentTask.Name), $"Current is incorrect. Expected: {currentTask.Name}. Actual: {machineInfo.CurrentTask}");
-                        Assert.True(machineInfo.ActualStart.Equals(currentTask.StartDate.ToString("MM/dd/yyyy") + " 12:00:00 AM"), "Actual start time is wrong");
                         Assert.True(machineInfo.EstimatedEnd.Equals(currentTask.EndDate.ToString("MM/dd/yyyy") + " 12:00:00 AM"), "Estimated end time is wrong");
 
                         var estimatedDurationActual =
@@ -114,28 +113,27 @@ namespace Tests.Tests.Machines
                             $"Estimated end time is wrong. Expected {currentTask.DurationPerTotal}. Actual {estimatedDurationActual}");
                         Assert.True(
                             upcomingTasks.First().Value.Select(e => e.Name).ToList()
-                                .Contains(machineInfo.UpcomingTask));
+                                .Contains(machineInfo.UpcomingWorkpiece));
                     });
         }
 
 
         [Test]
+        [Retry(2)] // because of false fails during regular run
         [Category("UI")]
         [Property("Reference", "TLM-133")]
         [Property("TestCase", "1247")]
-
+       
         public void CheckMachinesGridColumnsNames()
         {
             List<string> expectedColumnNames = new List<string>
                                                    {
                                                        "Machine",
-                                                       "Workpiece",
-                                                       "QTY",
+                                                       "Workpiece name",
                                                        "Current Task",
-                                                       "Actual Start",
-                                                       "Estimated Duration",
-                                                       "Estimated End",
-                                                       "Upcoming Task"
+                                                       "Duration",
+                                                       "Planned End",
+                                                       "Upcoming workpiece"
                                                    };
 
             var gridColumnsNames = App.Ui.Machines.GetGridColumnsNames();
@@ -150,6 +148,7 @@ namespace Tests.Tests.Machines
         }
 
         [Test]
+        [Retry(2)] // because of false fails during regular run
         [Category("UI")]
         [Property("Reference", "TLM-196")]
         [Property("TestCase", "1261")]
@@ -166,7 +165,7 @@ namespace Tests.Tests.Machines
         [Property("TestCase", "1274")]
         [Property("TestCase", "1275")]
         [Property("TestCase", "1276")]
-        public void CheckMachiesDetailsInformation()
+        public void CheckMachinesDetailsInformation()
         {
             #region Get test data
 
@@ -196,7 +195,7 @@ namespace Tests.Tests.Machines
                 () =>
                     {
                         Assert.True(uiCurrentTask.CurrentTask.Equals(currentTask.Name), $"Task name is incorrect. Expected: {currentTask.Name}. Actual: {uiCurrentTask.CurrentTask}");
-                        Assert.True(uiCurrentTask.Workpiece.Equals(workpiece.Name), $"Workpiece name is incorrect. Expected: {workpiece.Name}. Actual: {uiCurrentTask.Workpiece}");
+                        Assert.True(uiCurrentTask.WorkpieceName.Equals(workpiece.Name), $"Workpiece name is incorrect. Expected: {workpiece.Name}. Actual: {uiCurrentTask.WorkpieceName}");
                         Assert.True(uiCurrentTask.ActualStart.Equals(currentTask.StartDate.ToString("MM/dd/yyyy") + " 12:00:00 AM"), "Actual start time is wrong");
                         Assert.True(uiCurrentTask.EstimatedEnd.Equals(currentTask.EndDate.ToString("MM/dd/yyyy") + " 12:00:00 AM"), "Estimated end time is wrong");
 
@@ -216,20 +215,21 @@ namespace Tests.Tests.Machines
             // Check 'Next tasks' section
             var expectedUpcomingTasks = DateTasksDictionaryToList(upcomingTasks);
 
-            var uiUpcomingTasks = App.Ui.Machines.GetUpcomingTasksInformationFromMachineDetails();
+            var uiUpcomingTasks = App.Ui.Machines.GetUpcomingTasksInformationFromMachineDetails(true, 60);
 
-            Assert.True(expectedUpcomingTasks.Count.Equals(uiUpcomingTasks.Count), "Incorrect number of upcoming tasks is displayed");
+            Assert.True(expectedUpcomingTasks.Count.Equals(uiUpcomingTasks.Count), $"Incorrect number of upcoming tasks is displayed. Expected {expectedUpcomingTasks.Count} but actual {uiUpcomingTasks.Count}");
 
             foreach (var task in uiUpcomingTasks)
             {
-                var expectedTask = expectedUpcomingTasks.First(t => t.Name.Equals(task.UpcomingTask));
+                var expectedTask = expectedUpcomingTasks.First(t => t.Name.Equals(task.UpcomingWorkpiece) 
+                                                                    && (t.StartDate.ToString("MM/dd/yyyy") + " 12:00:00 AM").Equals(task.ActualStart));
                 
                 workpiece = this.GetWorkpieceByTaskId(expectedTask.Id);
 
                 var estimatedDurationActual =
                     ServiceMethods.ConvertDurationFromTimeFormatToSeconds(task.EstimatedDuration);
 
-                bool valid = task.Workpiece.Equals(workpiece.Name)
+                bool valid = task.WorkpieceName.Equals(workpiece.Name)
                              && (expectedTask.StartDate.ToString("MM/dd/yyyy") + " 12:00:00 AM").Equals(
                                  task.ActualStart) && expectedTask.DurationPerTotal.Equals(estimatedDurationActual)
                              && (expectedTask.EndDate.ToString("MM/dd/yyyy") + " 12:00:00 AM").Equals(task.EstimatedEnd)
@@ -268,91 +268,6 @@ namespace Tests.Tests.Machines
             App.Ui.Machines.ClickBackFromMachineDetails();
             var machinesPageOpened = App.Ui.Main.IsPageOpened(SidePanelData.Sections.Machines, true);
             Assert.True(machinesPageOpened, "Can't navigate back to Machines main page");
-
-
-        }
-
-        #region private methods
-
-            private Workpiece GetWorkpieceByTaskId(int taskId)
-        {
-            var workplanId = this.App.Db.ProjectManager.GetTask(taskId).WorkplanId;
-            var workplan = this.App.Db.ProjectManager.GetWorkplan(workplanId);
-            var workpiece = this.App.Db.ProjectManager.GetWorkpiece(workplan.WorkpieceId);
-            return workpiece;
-        }
-
-        private List<Task> DateTasksDictionaryToList(Dictionary<DateTime, List<Task>> upcomingTasks)
-        {
-            List<Task> expectedUpcomingTasks = new List<Task>();
-            foreach (var taskRecord in upcomingTasks)
-            {
-                foreach (var task in taskRecord.Value)
-                {
-                    expectedUpcomingTasks.Add(task);
-                }
-            }
-
-            return expectedUpcomingTasks;
-        }
-
-        private Dictionary<DateTime, List<Task>> GetUpcomingTasks(List<Task> apiMachineTasks, Task currentTask)
-        {
-            var upcomingTasks = apiMachineTasks.Where(t => !t.Name.Equals(currentTask.Name)).ToList();
-            upcomingTasks.Sort((x, y) => DateTime.Compare(x.StartDate, y.StartDate));
-
-            Dictionary<DateTime, List<Task>> upcomingTasksAndDates = new Dictionary<DateTime, List<Task>>();
-
-            foreach (var task in upcomingTasks)
-            {
-                if (upcomingTasksAndDates.ContainsKey(task.StartDate))
-                {
-                    upcomingTasksAndDates[task.StartDate].Add(task);
-                }
-                else
-                {
-                    upcomingTasksAndDates.Add(task.StartDate, new List<Task>());
-                    upcomingTasksAndDates[task.StartDate].Add(task);
-                }
-            }
-
-            foreach (var upcomingTask in upcomingTasksAndDates)
-            {
-                if (upcomingTask.Value.Count > 1)
-                {
-                    var tasks = upcomingTasksAndDates[upcomingTask.Key];
-                    this.SortTasksByCreatedDate(ref tasks);
-                }
-            }
-
-            return upcomingTasksAndDates;
-        }
-
-        private Task GetCurrentTask(List<Task> apiMachineTasks)
-        {
-            var potentiallyStartedtasks = apiMachineTasks.Where(t => t.StartDate <= DateTime.Now).ToList();
-            var firstTask = potentiallyStartedtasks.First();
-            var currentTaskCandidates = apiMachineTasks.Where(t => t.StartDate.Equals(firstTask.StartDate)).ToList();
-
-            this.SortTasksByCreatedDate(ref currentTaskCandidates);
-            var currentTask = currentTaskCandidates.First();
-            return currentTask;
-        }
-
-        private void SortTasksByCreatedDate(ref List<Task> currentTaskCandidates)
-        {
-            if (currentTaskCandidates.Count > 1)
-            {
-                foreach (var task in currentTaskCandidates)
-                {
-                    var dbTask = this.App.Db.ProjectManager.GetTask(task.Id);
-                    currentTaskCandidates.First(t => t.Id == task.Id).CreatedDate = dbTask.CreatedDate;
-                }
-
-                currentTaskCandidates.Sort((x, y) => DateTime.Compare(x.CreatedDate, y.CreatedDate));
-            }
-        }
-
-        #endregion
+        }      
     }
 }

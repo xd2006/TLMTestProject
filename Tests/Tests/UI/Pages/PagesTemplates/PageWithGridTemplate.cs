@@ -30,7 +30,7 @@ namespace Tests.UI.Pages.PagesTemplates
 
         private readonly By activePageButtonLocator = By.CssSelector("div[class$='pagination_buttons'] > button[class$='current']");
 
-        private readonly By tableLocator = By.CssSelector("table");
+        private readonly By tableHeaderLocator = By.XPath("//table/thead/tr");
 
         #endregion
 
@@ -47,7 +47,14 @@ namespace Tests.UI.Pages.PagesTemplates
         #region waits
         public void WaitForPageLoad(int timeout)
         {
-            this.Driver.WaitForElement(this.tableLocator, timeout);
+            if (Parameters.Parameters.Browser == "MicrosoftEdge")
+            {
+                this.Driver.WaitForElement(this.tableHeaderLocator, timeout);
+            }
+            else
+            {
+                this.Driver.WaitForElementVisible(this.tableHeaderLocator, timeout);
+            }
         }
 
         public void WaitForPageLoad()

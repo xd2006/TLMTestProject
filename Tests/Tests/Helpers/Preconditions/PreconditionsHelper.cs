@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Specialized;
+
 namespace Tests.Helpers.Preconditions
 {
     using System.Collections.Generic;
@@ -7,7 +9,6 @@ namespace Tests.Helpers.Preconditions
     using Bogus;
 
     using global::Tests.Managers;
-    using global::Tests.Models.ProjectManager.DbModels;
     using global::Tests.Models.ProjectManager.DbModels.Postgres;
     using global::Tests.TestsData.Orders;
     using global::Tests.TestsData.Orders.Enums;
@@ -101,9 +102,41 @@ namespace Tests.Helpers.Preconditions
             return App.GraphApi.ProjectManager.CreateTask(task);
         }
 
+        public int CreateTask(int workplanId, string machineName)
+        {
+            var taskGenerationRule = new Faker<Task>().Rules(
+                (f, o) =>
+                    {
+                        o.Name = "Task_" + f.Hacker.Noun() + "_" + f.Random.Int(1, 3000);
+                        o.DurationPerWorkpiece = f.Random.Int(1, 3000);
+                        o.DurationPerTotal = o.DurationPerWorkpiece * f.Random.Int(2, 100);
+                        o.StartDate = f.Date.Future(2);
+                        o.EndDate = o.StartDate.AddDays(f.Random.Int(1, 100));
+                        o.MachineId = App.GraphApi.ProjectManager.GetMachines().Where(m => m.name.Equals(machineName))
+                            .Select(m => m.id).ToList()[0];
+                        o.WorkplanId = workplanId;
+                    });
+
+            var task = taskGenerationRule.Generate();
+            return App.GraphApi.ProjectManager.CreateTask(task);
+        }
+
+
         public int CreateTask(Task task)
         {
             return App.GraphApi.ProjectManager.CreateTask(task);
+        }
+
+        public string AddCamFileToFirstWorkpieceTask(int workpieceId, string filePath)
+        {
+            App.Ui.OrdersMain.OpenWorkpieceDetailsDirectly(workpieceId);
+
+            var tasks = this.App.Ui.OrdersWorkpiece.GetTasksRecords(true, 50);
+            var taskName = tasks.First().Name;
+            App.Ui.OrdersWorkpiece.AddCamFileForTask(taskName, filePath);
+            App.Ui.OrdersWorkpiece.ClickBackLink();
+
+            return taskName;
         }
     }
 }
